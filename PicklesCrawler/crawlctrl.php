@@ -1,45 +1,33 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update: 12:53 2011/08/28
 
 /**
  * クロールコントロール
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update: 12:53 2011/08/28
  */
 class pxplugin_PicklesCrawler_crawlctrl{
 
-	var $conf;
-	var $errors;
-	var $req;
-	var $dbh;
-	var $user;
-	var $site;
-	var $theme;
-	var $custom;
+	private $px;
+	private $pcconf;
+	private $cmd;
 
-	var $pcconf;
-	var $project_model;
-	var $program_model;
+	private $project_model;
+	private $program_model;
 
-	var $target_url_list = array();	//実行待ちURLの一覧
-	var $done_url_count = 0;		//実行済みURLの数
+	private $target_url_list = array();	//実行待ちURLの一覧
+	private $done_url_count = 0;		//実行済みURLの数
 
-	var $crawl_starttime = 0;//クロール開始時刻
-	var $crawl_endtime = 0;//クロール終了時刻
+	private $crawl_starttime = 0;//クロール開始時刻
+	private $crawl_endtime = 0;//クロール終了時刻
 
 	/**
 	 * コンストラクタ
 	 */
-	public function __construct( &$pcconf ){
+	public function __construct( &$px, &$pcconf, $cmd ){
+		$this->px = &$px;
 		$this->pcconf = &$pcconf;
-		$this->conf = &$pcconf->get_basicobj_conf();
-		$this->errors = &$pcconf->get_basicobj_errors();
-		$this->dbh = &$pcconf->get_basicobj_dbh();
-		$this->req = &$pcconf->get_basicobj_req();
-		$this->user = &$pcconf->get_basicobj_user();
-		$this->site = &$pcconf->get_basicobj_site();
-		$this->theme = &$pcconf->get_basicobj_theme();
-		$this->custom = &$pcconf->get_basicobj_custom();
+		$this->cmd = &$cmd;
 
 		$this->project_model = &$this->pcconf->factory_model_project();
 		$this->project_model->load_project( $this->req->pvelm() );
@@ -1332,6 +1320,24 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 	#--------------------------------------
 	#	アプリケーションロックを解除する
+	function unlock(){
+		$lockfilepath = $this->get_path_lockfile();
+
+		#	PHPのFileStatusCacheをクリア
+		clearstatcache();
+
+		return	$this->dbh->rmdir( $lockfilepath );
+	}
+
+	#--------------------------------------
+	#	ロックファイルのパスを返す
+	function get_path_lockfile(){
+		return	realpath( $this->get_path_download_to() ).'/crawl.lock';
+	}
+
+}
+
+?>��
 	function unlock(){
 		$lockfilepath = $this->get_path_lockfile();
 

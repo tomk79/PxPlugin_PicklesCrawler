@@ -1,59 +1,56 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update : 22:52 2011/08/15
-
-#******************************************************************************************************************
-#	モデル：プロジェクト
+/**
+ * モデル：プロジェクト
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update : 22:52 2011/08/15
+ */
 class pxplugin_PicklesCrawler_model_project{
 
-	var $conf;
-	var $errors;
-	var $dbh;
+	private $px;
+	private $pcconf;
 
-	var $pcconf;
+	private $info_project_id = null;
+	private $info_project_name = null;
+	private $info_url_startpage = null;
+	private $info_url_docroot = null;
+	private $info_default_filename = null;
+	private $info_omit_filename = false;//22:53 2011/08/15 PxCrawler 0.4.3 追加
+	private $info_urllist_outofsite = array();
+	private $info_urllist_startpages = array();
+	private $info_param_define = array();
+	private $info_send_unknown_params_flg = false;//0:07 2008/04/17 追加
+	private $info_send_form_flg = false;//23:41 2008/04/17 追加
+	private $info_parse_jsinhtml_flg = false;//9:39 2011/08/11 PxCrawler 0.4.3 追加
+	private $info_save404_flg = false;//23:21 2009/03/11 追加
+	private $info_path_copyto = false;//0:51 2009/08/27 追加
+	private $info_charset_charset = null;//23:28 2009/03/30 追加
+	private $info_charset_crlf = null;//23:28 2009/03/30 追加
+	private $info_charset_ext = null;//23:28 2009/03/30 追加
+	private $info_localfilename_rewriterules = array();
+	private $info_preg_replace_rules = array();//23:28 2009/03/30 追加
+	private $info_path_conv_method = 'relative';
+	private $info_outofsite2url_flg = false;//PxCrawler 0.4.2 追加
 
-	var $info_project_id = null;
-	var $info_project_name = null;
-	var $info_url_startpage = null;
-	var $info_url_docroot = null;
-	var $info_default_filename = null;
-	var $info_omit_filename = false;//22:53 2011/08/15 PxCrawler 0.4.3 追加
-	var $info_urllist_outofsite = array();
-	var $info_urllist_startpages = array();
-	var $info_param_define = array();
-	var $info_send_unknown_params_flg = false;//0:07 2008/04/17 追加
-	var $info_send_form_flg = false;//23:41 2008/04/17 追加
-	var $info_parse_jsinhtml_flg = false;//9:39 2011/08/11 PxCrawler 0.4.3 追加
-	var $info_save404_flg = false;//23:21 2009/03/11 追加
-	var $info_path_copyto = false;//0:51 2009/08/27 追加
-	var $info_charset_charset = null;//23:28 2009/03/30 追加
-	var $info_charset_crlf = null;//23:28 2009/03/30 追加
-	var $info_charset_ext = null;//23:28 2009/03/30 追加
-	var $info_localfilename_rewriterules = array();
-	var $info_preg_replace_rules = array();//23:28 2009/03/30 追加
-	var $info_path_conv_method = 'relative';
-	var $info_outofsite2url_flg = false;//PxCrawler 0.4.2 追加
-
-	#--------------------------------------
-	#	コンストラクタ
-	function pxplugin_PicklesCrawler_model_project( &$conf , &$pcconf , &$errors , &$dbh ){
-		$this->conf = &$conf;
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$px , &$pcconf ){
+		$this->px = &$px;
 		$this->pcconf = &$pcconf;
-		$this->errors = &$errors;
-		$this->dbh = &$dbh;
 	}
 
 
-	#--------------------------------------
-	#	ファクトリ：プログラムオブジェクトを生成
-	function &factory_program( $program_id = null ){
-		$objPath = '/plugins/PicklesCrawler/model/program.php';
-		$className = $this->dbh->require_lib( $objPath );
+	/**
+	 * ファクトリ：プログラムオブジェクトを生成
+	 */
+	public function &factory_program( $program_id = null ){
+		$objPath = '/PicklesCrawler/model/program.php';
+		$className = $this->px->load_px_plugin_class( $objPath );
 		if( !$className ){
-			$this->errors->error_log( 'プログラムオブジェクトのロードに失敗しました。['.$objPath.']' );
+			$this->px->error()->error_log( 'プログラムオブジェクトのロードに失敗しました。['.$objPath.']' , __FILE__ , __LINE__ );
 		}
-		$obj = new $className( &$this->conf , &$this->pcconf , &$this , &$this->errors , &$this->dbh );
+		$obj = new $className( $this->conf , $this->pcconf , $this , $this->errors , $this->dbh );
 		if( strlen( $program_id ) ){
 			$obj->load_program( $program_id );
 		}else{
@@ -62,11 +59,12 @@ class pxplugin_PicklesCrawler_model_project{
 		return	$obj;
 	}
 
-	#--------------------------------------
-	#	既存プロジェクトの一覧を開く
-	function get_project_list(){
+	/**
+	 * 既存プロジェクトの一覧を開く
+	 */
+	public function get_project_list(){
 		$dir = $this->pcconf->get_home_dir().'/proj';
-		$itemlist = $this->dbh->getfilelist( $dir );
+		$itemlist = $this->px->dbh()->ls( $dir );
 		sort($itemlist);
 
 		$RTN = array();
@@ -87,9 +85,10 @@ class pxplugin_PicklesCrawler_model_project{
 		return	$RTN;
 	}
 
-	#--------------------------------------
-	#	既存のプロジェクト情報を開いて、メンバにセット。
-	function load_project( $project_id ){
+	/**
+	 * 既存のプロジェクト情報を開いて、メンバにセット。
+	 */
+	public function load_project( $project_id ){
 		$this->info_project_id = $project_id;
 		$path_project_dir = $this->get_project_home_dir();
 		if( !is_dir( $path_project_dir ) ){ return false; }
@@ -199,17 +198,18 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		uasort( $this->info_localfilename_rewriterules , create_function( '$a,$b' , 'if($a[\'priority\']>$b[\'priority\']){return 1;}elseif($a[\'priority\']<$b[\'priority\']){return -1;}return 0;' ) );
 
-		$this->dbh->fclose( $path_project_dir.'/project.ini' );
-		$this->dbh->fclose( $path_project_dir.'/param_define.ini' );
-		$this->dbh->fclose( $path_project_dir.'/localfilename_rewriterules.ini' );
-		$this->dbh->fclose( $path_project_dir.'/preg_replace.ini' );
+		$this->px->dbh()->fclose( $path_project_dir.'/project.ini' );
+		$this->px->dbh()->fclose( $path_project_dir.'/param_define.ini' );
+		$this->px->dbh()->fclose( $path_project_dir.'/localfilename_rewriterules.ini' );
+		$this->px->dbh()->fclose( $path_project_dir.'/preg_replace.ini' );
 
 		return	true;
-	}
+	}//load_project()
 
-	#--------------------------------------
-	#	プロジェクトの現在の状態を保存する
-	function save_project(){
+	/**
+	 * プロジェクトの現在の状態を保存する
+	 */
+	public function save_project(){
 		if( !strlen( $this->get_project_id() ) ){ return false; }
 
 		$path_project_dir = $this->get_project_home_dir();
@@ -294,10 +294,10 @@ class pxplugin_PicklesCrawler_model_project{
 #		}
 		$project_ini_src .= ''."\n";
 
-		if( !$this->dbh->savefile( $path_project_dir.'/project.ini' , $project_ini_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/project.ini' , $project_ini_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/project.ini');
+		$this->px->dbh()->fclose($path_project_dir.'/project.ini');
 
 		#======================================
 		#	url_outofsite.txt
@@ -310,10 +310,10 @@ class pxplugin_PicklesCrawler_model_project{
 				$project_ini_src .= trim($url)."\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_project_dir.'/url_outofsite.txt' , $project_ini_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/url_outofsite.txt' , $project_ini_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/url_outofsite.txt');
+		$this->px->dbh()->fclose($path_project_dir.'/url_outofsite.txt');
 
 		#======================================
 		#	url_startpages.txt
@@ -326,10 +326,10 @@ class pxplugin_PicklesCrawler_model_project{
 				$project_ini_src .= trim($url)."\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_project_dir.'/url_startpages.txt' , $project_ini_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/url_startpages.txt' , $project_ini_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/url_startpages.txt');
+		$this->px->dbh()->fclose($path_project_dir.'/url_startpages.txt');
 
 
 		#======================================
@@ -346,10 +346,10 @@ class pxplugin_PicklesCrawler_model_project{
 				$param_define_ini_src .= "\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_project_dir.'/param_define.ini' , $param_define_ini_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/param_define.ini' , $param_define_ini_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/param_define.ini');
+		$this->px->dbh()->fclose($path_project_dir.'/param_define.ini');
 
 		#======================================
 		#	localfilename_rewriterules.ini
@@ -368,10 +368,10 @@ class pxplugin_PicklesCrawler_model_project{
 				$rewriterules_src .= "\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_project_dir.'/localfilename_rewriterules.ini' , $rewriterules_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/localfilename_rewriterules.ini' , $rewriterules_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/localfilename_rewriterules.ini');
+		$this->px->dbh()->fclose($path_project_dir.'/localfilename_rewriterules.ini');
 
 		#======================================
 		#	preg_replace.ini
@@ -392,17 +392,18 @@ class pxplugin_PicklesCrawler_model_project{
 				$preg_replace_rules_src .= "\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_project_dir.'/preg_replace.ini' , $preg_replace_rules_src ) ){
+		if( !$this->px->dbh()->save_file( $path_project_dir.'/preg_replace.ini' , $preg_replace_rules_src ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_project_dir.'/preg_replace.ini');
+		$this->px->dbh()->fclose($path_project_dir.'/preg_replace.ini');
 
 		return	true;
-	}
+	}//save_project()
 
-	#--------------------------------------
-	#	プロジェクトを削除する
-	function destroy_project(){
+	/**
+	 * プロジェクトを削除する
+	 */
+	public function destroy_project(){
 		if( !strlen( $this->get_project_id() ) ){ return false; }
 
 		$path_project_dir = $this->get_project_home_dir();
@@ -410,73 +411,74 @@ class pxplugin_PicklesCrawler_model_project{
 			return false;
 		}
 
-		$result = $this->dbh->rmdir( $path_project_dir );
+		$result = $this->px->dbh()->rmdir( $path_project_dir );
 		if( !$result ){
 			return	false;
 		}
 
 		return	true;
-	}
+	}//destroy_project()
 
 
-	#--------------------------------------
-	#	プロジェクトIDの入出力
-	function get_project_id(){
+	/**
+	 * プロジェクトIDの入出力
+	 */
+	public function get_project_id(){
 		return	$this->info_project_id;
 	}
 
 	#--------------------------------------
 	#	プロジェクト名の入出力
-	function set_project_name( $name ){
+	public function set_project_name( $name ){
 		$this->info_project_name = $name;
 		return	true;
 	}
-	function get_project_name(){
+	public function get_project_name(){
 		return	$this->info_project_name;
 	}
 
 	#--------------------------------------
 	#	スタートページURLの入出力
-	function set_url_startpage( $url_startpage ){
+	public function set_url_startpage( $url_startpage ){
 		$this->info_url_startpage = $url_startpage;
 		return	true;
 	}
-	function get_url_startpage(){
+	public function get_url_startpage(){
 		return	$this->info_url_startpage;
 	}
 
 	#--------------------------------------
 	#	ドキュメントルートURLの入出力
-	function set_url_docroot( $url_docroot ){
+	public function set_url_docroot( $url_docroot ){
 		$this->info_url_docroot = $url_docroot;
 		return	true;
 	}
-	function get_url_docroot(){
+	public function get_url_docroot(){
 		return	$this->info_url_docroot;
 	}
 
 	#--------------------------------------
 	#	デフォルトファイル名の入出力
-	function get_default_filename(){
+	public function get_default_filename(){
 		if( !strlen( $this->info_default_filename ) ){
 			return	'index.html';
 		}
 		return	$this->info_default_filename;
 	}
-	function set_default_filename( $default_filename ){
+	public function set_default_filename( $default_filename ){
 		$this->info_default_filename = $default_filename;
 		return	true;
 	}
 
 	#--------------------------------------
 	#	URL変換時に省略するファイル名の入出力
-	function get_omit_filename(){
+	public function get_omit_filename(){
 		if( !strlen( $this->info_omit_filename ) ){
 			return	array();
 		}
 		return	$this->info_omit_filename;
 	}
-	function set_omit_filename( $omit_filename ){
+	public function set_omit_filename( $omit_filename ){
 		if( is_array( $omit_filename ) ){
 			//配列ならOK
 		}elseif( is_string( $omit_filename ) ){
@@ -498,7 +500,7 @@ class pxplugin_PicklesCrawler_model_project{
 
 	#--------------------------------------
 	#	パス変換方法の入出力
-	function set_path_conv_method( $path_conv_method ){
+	public function set_path_conv_method( $path_conv_method ){
 		$path_conv_method = strtolower( $path_conv_method.'' );
 		switch( $path_conv_method ){
 			case 'relative':
@@ -513,7 +515,7 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_path_conv_method(){
+	public function get_path_conv_method(){
 		if( !strlen( $this->info_path_conv_method ) ){
 			return	'relative';
 		}
@@ -523,7 +525,7 @@ class pxplugin_PicklesCrawler_model_project{
 	#--------------------------------------
 	#	サイト外扱いのパスをURLに変換するか否か
 	#	PxCrawler 0.4.2 追加
-	function set_outofsite2url_flg( $flg ){
+	public function set_outofsite2url_flg( $flg ){
 		if( $flg ){
 			$this->info_outofsite2url_flg = true;
 		}else{
@@ -531,13 +533,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_outofsite2url_flg(){
+	public function get_outofsite2url_flg(){
 		return	$this->info_outofsite2url_flg;
 	}
 
 	#--------------------------------------
 	#	未定義パラメータの送信可否フラグ
-	function set_send_unknown_params_flg( $flg ){
+	public function set_send_unknown_params_flg( $flg ){
 		if( $flg ){
 			$this->info_send_unknown_params_flg = true;
 		}else{
@@ -545,13 +547,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_send_unknown_params_flg(){
+	public function get_send_unknown_params_flg(){
 		return	$this->info_send_unknown_params_flg;
 	}
 
 	#--------------------------------------
 	#	フォーム送信可否フラグ
-	function set_send_form_flg( $flg ){
+	public function set_send_form_flg( $flg ){
 		if( $flg ){
 			$this->info_send_form_flg = true;
 		}else{
@@ -559,13 +561,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_send_form_flg(){
+	public function get_send_form_flg(){
 		return	$this->info_send_form_flg;
 	}
 
 	#--------------------------------------
 	#	HTML内埋め込みのJavaScriptを解析するフラグ
-	function set_parse_jsinhtml_flg( $flg ){
+	public function set_parse_jsinhtml_flg( $flg ){
 		if( $flg ){
 			$this->info_parse_jsinhtml_flg = true;
 		}else{
@@ -573,13 +575,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_parse_jsinhtml_flg(){
+	public function get_parse_jsinhtml_flg(){
 		return	$this->info_parse_jsinhtml_flg;
 	}
 
 	#--------------------------------------
 	#	Not Found ページ収集フラグ
-	function set_save404_flg( $flg ){
+	public function set_save404_flg( $flg ){
 		if( $flg ){
 			$this->info_save404_flg = true;
 		}else{
@@ -587,26 +589,26 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_save404_flg(){
+	public function get_save404_flg(){
 		return	$this->info_save404_flg;
 	}
 
 	#--------------------------------------
 	#	複製先パス
-	function set_path_copyto( $path ){
+	public function set_path_copyto( $path ){
 		if( strlen( $path ) ){
 			$path = realpath( $path );
 		}
 		$this->info_path_copyto = $path;
 		return	true;
 	}
-	function get_path_copyto(){
+	public function get_path_copyto(){
 		return	$this->info_path_copyto;
 	}
 
 	#--------------------------------------
 	#	文字コード・改行コード：文字コード
-	function set_charset_charset( $charset ){
+	public function set_charset_charset( $charset ){
 		if( strlen( $charset ) ){
 			$this->info_charset_charset = $charset;
 		}else{
@@ -614,13 +616,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_charset_charset(){
+	public function get_charset_charset(){
 		return	$this->info_charset_charset;
 	}
 
 	#--------------------------------------
 	#	文字コード・改行コード：改行コード
-	function set_charset_crlf( $crlf ){
+	public function set_charset_crlf( $crlf ){
 		if( strlen( $crlf ) ){
 			$this->info_charset_crlf = $crlf;
 		}else{
@@ -628,13 +630,13 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_charset_crlf(){
+	public function get_charset_crlf(){
 		return	$this->info_charset_crlf;
 	}
 
 	#--------------------------------------
 	#	文字コード・改行コード：拡張子
-	function set_charset_ext( $ext ){
+	public function set_charset_ext( $ext ){
 		if( strlen( $ext ) ){
 			$this->info_charset_ext = $ext;
 		}else{
@@ -642,26 +644,26 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function get_charset_ext(){
+	public function get_charset_ext(){
 		return	$this->info_charset_ext;
 	}
 
 	#--------------------------------------
 	#	パラメータの扱い定義の入出力
-	function set_param_define( $param_key , $define_key , $value ){
+	public function set_param_define( $param_key , $define_key , $value ){
 		$this->info_param_define[$param_key][$define_key] = $value;
 		return	true;
 	}
-	function get_param_define( $param_key , $define_key = null ){
+	public function get_param_define( $param_key , $define_key = null ){
 		if( is_null( $define_key ) ){
 			return	$this->info_param_define[$param_key];
 		}
 		return	$this->info_param_define[$param_key][$define_key];
 	}
-	function get_param_define_list(){
+	public function get_param_define_list(){
 		return	array_keys( $this->info_param_define );
 	}
-	function is_param_allowed( $key ){
+	public function is_param_allowed( $key ){
 		#	送信していいパラメータ名か調べる
 		if( !array_key_exists( $key , $this->info_param_define ) ){
 			#	未定義のパラメータなら
@@ -676,55 +678,55 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function clear_param_define(){
+	public function clear_param_define(){
 		return	$this->info_param_define = array();
 	}
 
 	#--------------------------------------
 	#	保存ファイル名のリライトルール情報の入出力
-	function get_localfilename_rewriterules(){
+	public function get_localfilename_rewriterules(){
 		return	$this->info_localfilename_rewriterules;
 	}
-	function set_localfilename_rewriterules( $rules ){
+	public function set_localfilename_rewriterules( $rules ){
 		if( !is_array( $rules ) ){
 			return	false;
 		}
 		$this->info_localfilename_rewriterules = $rules;
 		return	true;
 	}
-	function clear_localfilename_rewriterules(){
+	public function clear_localfilename_rewriterules(){
 		$this->info_localfilename_rewriterules = array();
 		return	true;
 	}
 
 	#--------------------------------------
 	#	一括置換設定情報の入出力
-	function get_preg_replace_rules(){
+	public function get_preg_replace_rules(){
 		return	$this->info_preg_replace_rules;
 	}
-	function set_preg_replace_rules( $rules ){
+	public function set_preg_replace_rules( $rules ){
 		if( !is_array( $rules ) ){
 			return	false;
 		}
 		$this->info_preg_replace_rules = $rules;
 		return	true;
 	}
-	function clear_preg_replace_rules(){
+	public function clear_preg_replace_rules(){
 		$this->info_preg_replace_rules = array();
 		return	true;
 	}
 
 	#--------------------------------------
 	#	対象外URLリストの入出力
-	function set_urllist_outofsite( $str_outofsite ){
+	public function set_urllist_outofsite( $str_outofsite ){
 		$this->clear_urllist_outofsite();//一旦リセット
 		return	$this->put_urllist_outofsite( $str_outofsite );
 	}
-	function clear_urllist_outofsite(){
+	public function clear_urllist_outofsite(){
 		$this->info_urllist_outofsite = array();//一旦リセット
 		return	true;
 	}
-	function put_urllist_outofsite( $url_outofsite ){
+	public function put_urllist_outofsite( $url_outofsite ){
 		if( is_array( $url_outofsite ) ){
 			#	配列をもらったら、全部処理
 			foreach( $url_outofsite as $url ){
@@ -749,10 +751,10 @@ class pxplugin_PicklesCrawler_model_project{
 
 		return	true;
 	}
-	function get_urllist_outofsite(){
+	public function get_urllist_outofsite(){
 		return	$this->info_urllist_outofsite;
 	}
-	function is_outofsite( $url ){
+	public function is_outofsite( $url ){
 		#	アンカーを削除
 		$url = preg_replace( '/^(.*?)#.*$/si' , '\1' , $url );
 		#	パラメータを削除
@@ -779,15 +781,15 @@ class pxplugin_PicklesCrawler_model_project{
 
 	#--------------------------------------
 	#	追加スタートページURLリストの入出力
-	function set_urllist_startpages( $str_startpages ){
+	public function set_urllist_startpages( $str_startpages ){
 		$this->clear_urllist_startpages();//一旦リセット
 		return	$this->put_urllist_startpages( $str_startpages );
 	}
-	function clear_urllist_startpages(){
+	public function clear_urllist_startpages(){
 		$this->info_urllist_startpages = array();//一旦リセット
 		return	true;
 	}
-	function put_urllist_startpages( $url_startpages ){
+	public function put_urllist_startpages( $url_startpages ){
 		if( is_array( $url_startpages ) ){
 			#	配列をもらったら、全部処理
 			foreach( $url_startpages as $url ){
@@ -811,13 +813,13 @@ class pxplugin_PicklesCrawler_model_project{
 
 		return	true;
 	}
-	function get_urllist_startpages(){
+	public function get_urllist_startpages(){
 		return	$this->info_urllist_startpages;
 	}
 
 	#--------------------------------------
 	#	認証情報
-	function set_authentication_type( $val ){
+	public function set_authentication_type( $val ){
 		if( !strlen( $val ) ){
 			$this->authentication_type = null;
 			return	true;
@@ -832,24 +834,24 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		return	true;
 	}
-	function set_basic_authentication_id( $val ){
+	public function set_basic_authentication_id( $val ){
 		$this->basic_authentication_id = $val;
 		return	true;
 	}
-	function set_basic_authentication_pw( $val ){
+	public function set_basic_authentication_pw( $val ){
 		$this->basic_authentication_pw = $val;
 		return	true;
 	}
-	function get_authentication_type(){
+	public function get_authentication_type(){
 		return	$this->authentication_type;
 	}
-	function get_basic_authentication_id(){
+	public function get_basic_authentication_id(){
 		return	$this->basic_authentication_id;
 	}
-	function get_basic_authentication_pw(){
+	public function get_basic_authentication_pw(){
 		return	$this->basic_authentication_pw;
 	}
-	function isset_basic_authentication_info(){
+	public function isset_basic_authentication_info(){
 		if( strlen( $this->basic_authentication_id ) && strlen( $this->basic_authentication_pw ) ){
 			return	true;
 		}
@@ -858,11 +860,11 @@ class pxplugin_PicklesCrawler_model_project{
 
 	#--------------------------------------
 	#	プログラムIDの一覧を得る
-	function get_program_list(){
+	public function get_program_list(){
 		$program_dir = $this->pcconf->get_program_home_dir( $this->info_project_id );
 		if( !is_dir( $program_dir ) ){ return array(); }
 
-		$itemlist = $this->dbh->getfilelist( $program_dir );
+		$itemlist = $this->px->dbh()->ls( $program_dir );
 		if( !is_array( $itemlist ) ){ return array(); }
 
 		$RTN = array();
@@ -882,16 +884,17 @@ class pxplugin_PicklesCrawler_model_project{
 
 
 
-	#--------------------------------------
-	#	新しいプロジェクトを作成する
-	function create_new_project( $project_id ){
+	/**
+	 * 新しいプロジェクトを作成する
+	 */
+	public function create_new_project( $project_id ){
 		$this->info_project_id = $project_id;
 		$path_project_dir = $this->get_project_home_dir();
 		if( is_dir( $path_project_dir ) ){
 			#	既にディレクトリが存在していたら、ダメ。
 			return	false;
 		}
-		if( !$this->dbh->mkdirall( $path_project_dir ) ){
+		if( !$this->px->dbh()->mkdir_all( $path_project_dir ) ){
 			#	ディレクトリの作成に失敗したら、ダメ。
 			return	false;
 		}
@@ -899,21 +902,23 @@ class pxplugin_PicklesCrawler_model_project{
 
 	}
 
-	#--------------------------------------
-	#	プロジェクトのホームディレクトリを取得する
-	function get_project_home_dir(){
+	/**
+	 * プロジェクトのホームディレクトリを取得する
+	 */
+	public function get_project_home_dir(){
 		if( !strlen( $this->info_project_id ) ){ return false; }
 		$projHome = $this->pcconf->get_proj_dir( $this->info_project_id );
 		return	$projHome;
 	}
 
-	#--------------------------------------
-	#	iniファイルを読み込んで、配列にして返す。
-	function load_ini( $path_ini ){
+	/**
+	 * iniファイルを読み込んで、配列にして返す。
+	 */
+	public function load_ini( $path_ini ){
 		if( !$this->dbh->is_readable( $path_ini ) ){
 			return	false;
 		}
-		$ini_lines = $this->dbh->file_get_lines( $path_ini );
+		$ini_lines = $this->px->dbh()->file_get_lines( $path_ini );
 		if( !is_array( $ini_lines ) ){
 			return	false;
 		}
@@ -954,9 +959,10 @@ class pxplugin_PicklesCrawler_model_project{
 
 
 
-	#--------------------------------------
-	#	URLをhttp://から始まる絶対URLに調整する
-	function optimize_url( $url ){
+	/**
+	 * URLをhttp://から始まる絶対URLに調整する
+	 */
+	public function optimize_url( $url ){
 		if( preg_match( '/#/' , $url ) ){
 			#	アンカーは消しとく。
 			$url = preg_replace( '/^(.*?)#.*$/si' , "$1" , $url );
@@ -995,11 +1001,12 @@ class pxplugin_PicklesCrawler_model_project{
 			$url = strtolower( $PROTOCOL ).'://'.strtolower( $DOMAIN ).'/'.$PATH.$PARAM;
 		}
 		return	$url;
-	}
+	}//optimize_url()
 
-	#--------------------------------------
-	#	URLを /http/～～ で始まる内部パス(保存先パス)に変換する
-	function url2localpath( $url , $post_data = null ){
+	/**
+	 * URLを /http/～～ で始まる内部パス(保存先パス)に変換する
+	 */
+	public function url2localpath( $url , $post_data = null ){
 		if( strpos( $url , '#' ) ){
 			#	アンカーは削除する。
 			list( $url , $anchor ) = explode( '#' , $url, 2 );
@@ -1132,7 +1139,7 @@ class pxplugin_PicklesCrawler_model_project{
 		$RTN = '/'.$PROTOCOL.'/'.$DOMAIN.'/'.$PATH;
 		$RTN = preg_replace( '/\/+/' , '/' , $RTN );
 		return	$RTN;
-	}
+	}//url2localpath()
 
 }
 

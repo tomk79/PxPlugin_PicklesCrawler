@@ -13,8 +13,6 @@ class pxplugin_PicklesCrawler_register_pxcommand extends px_bases_pxcommand{
 	 */
 	public function __construct( $command , $px ){
 		parent::__construct( $command , $px );
-		$this->px = $px;
-
 		$this->homepage();
 	}
 
@@ -25,36 +23,48 @@ class pxplugin_PicklesCrawler_register_pxcommand extends px_bases_pxcommand{
 		$command = $this->get_command();
 
 
-/*
 		#--------------------------------------
 		#    PicklesCrawler コンフィグを生成
-		$className = $dbh->require_lib( '/plugins/PicklesCrawler/config.php' );
-		$pcconf = new $className( &$conf , &$errors , &$dbh , &$req , &$user , &$site , &$theme , &$custom );
+		$className = $this->px->load_px_plugin_class( '/PicklesCrawler/config.php' );
+		$pcconf = new $className( $this->px );
 
 		#--------------------------------------
 		#    設定
 
 		# クローラのページIDを設定。
 		# ここでは、ページID crawlctrl を指定する。
-		$pcconf->pid = array(
-		    'crawlctrl'=>'crawlctrl',
-		);
+		// $pcconf->pid = array(
+		//     'crawlctrl'=>'crawlctrl',
+		// );
 
 		# PicklesCrawlerに付与するホームディレクトリを設定。
 		# RAMデータディレクトリ内に専用の領域を付与している。
-		$pcconf->set_home_dir( $conf->path_ramdata_dir.'/plugins/PicklesCrawler' );
+		if( !$pcconf->set_home_dir( $this->px->get_conf('paths.px_dir').'_sys/ramdata/plugins/PicklesCrawler' ) ){
+			$src = '';
+			$src .= '<p>'.t::h($this->px->get_conf('paths.px_dir').'_sys/ramdata/plugins/PicklesCrawler').' の作成に失敗しました。</p>'."\n";
+			print $this->html_template($src);
+			exit;
+		}
 
 		#    / 設定
 		#--------------------------------------
 
+		$cmd = $this->pxcommand_name;
+		array_shift($cmd);// "plugins" をトル
+		array_shift($cmd);// "PicklesCrawler" をトル
 
-		$obj = &$pcconf->factory_admin();
-		return    $obj->start();
+		if( $cmd[0] == 'run' ){
+			// クロールを実行する
+			$obj = &$pcconf->factory_crawlctrl($cmd);
+			print $obj->start();
+			exit;
+		}
 
-*/
+		// 管理画面を表示
+		$obj = &$pcconf->factory_admin($cmd);
 
 		$src = '';
-		$src .= '<p>サンプル</p>'."\n";
+		$src .= $obj->start();
 
 		print $this->html_template($src);
 		exit;
