@@ -5,7 +5,7 @@
 
 #------------------------------------------------------------------------------------------------------------------
 #	HTMLのメタ情報を抽出
-class base_plugins_PicklesCrawler_resources_parsehtmlmetainfo{
+class pxplugin_PicklesCrawler_resources_parsehtmlmetainfo{
 
 	var $metadata = array(
 		'title'=>null ,

@@ -7,7 +7,7 @@ require_once( $conf->path_lib_base.'/plugins/PicklesCrawler/programbase/execute.
 
 #--------------------------------------
 #	スナップショットの実行
-class base_plugins_PicklesCrawler_program_snapshot_execute extends base_plugins_PicklesCrawler_programbase_execute{
+class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesCrawler_programbase_execute{
 
 #	var $debug_mode = true;
 		#	デバッグモード。

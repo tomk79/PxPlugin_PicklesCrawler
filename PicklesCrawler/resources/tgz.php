@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	tgz形式のファイルの結合・展開
-class base_plugins_PicklesCrawler_resources_tgz{
+class pxplugin_PicklesCrawler_resources_tgz{
 
 	var $conf;
 	var $dbh;
@@ -15,7 +15,7 @@ class base_plugins_PicklesCrawler_resources_tgz{
 
 	#----------------------------------------------------------------------------
 	#	コンストラクタ
-	function base_plugins_PicklesCrawler_resources_tgz( &$conf , &$dbh , &$errors ){
+	function pxplugin_PicklesCrawler_resources_tgz( &$conf , &$dbh , &$errors ){
 		$this->conf = &$conf;
 		$this->dbh = &$dbh;
 		$this->errors = &$errors;

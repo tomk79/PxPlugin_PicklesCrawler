@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	各プログラムの基底クラス
-class base_plugins_PicklesCrawler_programbase_execute{
+class pxplugin_PicklesCrawler_programbase_execute{
 
 	var $conf;
 	var $errors;
@@ -23,7 +23,7 @@ class base_plugins_PicklesCrawler_programbase_execute{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function base_plugins_PicklesCrawler_programbase_execute( &$conf , &$pcconf , &$proj , &$program , &$errors , &$dbh , &$req ){
+	function pxplugin_PicklesCrawler_programbase_execute( &$conf , &$pcconf , &$proj , &$program , &$errors , &$dbh , &$req ){
 		$this->conf = &$conf;
 		$this->pcconf = &$pcconf;
 		$this->proj = &$proj;

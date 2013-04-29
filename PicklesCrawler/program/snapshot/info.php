@@ -7,10 +7,7 @@ require_once( $conf->path_lib_base.'/plugins/PicklesCrawler/programbase/info.php
 
 #--------------------------------------
 #	スナップショット各種情報クラス
-class base_plugins_PicklesCrawler_program_snapshot_info extends base_plugins_PicklesCrawler_programbase_info{
+class pxplugin_PicklesCrawler_program_snapshot_info extends pxplugin_PicklesCrawler_programbase_info{
 }
-
-
-
 
 ?>

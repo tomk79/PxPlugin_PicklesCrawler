@@ -3,9 +3,10 @@
 #	Copyright (C)Tomoya Koyanagi.
 #	Last Update: 12:54 2011/08/28
 
-#******************************************************************************************************************
-#	プロジェクト管理機能
-class base_plugins_PicklesCrawler_admin{
+/**
+ * プロジェクト管理機能
+ */
+class pxplugin_PicklesCrawler_admin{
 
 	var $conf;
 	var $errors;
@@ -18,9 +19,10 @@ class base_plugins_PicklesCrawler_admin{
 
 	var $pcconf;
 
-	#--------------------------------------
-	#	コンストラクタ
-	function base_plugins_PicklesCrawler_admin( &$pcconf ){
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$pcconf ){
 		$this->pcconf = &$pcconf;
 		$this->conf = &$pcconf->get_basicobj_conf();
 		$this->errors = &$pcconf->get_basicobj_errors();
@@ -34,16 +36,19 @@ class base_plugins_PicklesCrawler_admin{
 		$this->additional_constructor();
 		$this->set_sitemap();
 	}
-	#--------------------------------------
-	#	コンストラクタの追加処理
-	function additional_constructor(){
+
+	/**
+	 * コンストラクタの追加処理
+	 */
+	private function additional_constructor(){
 		#	必要に応じて拡張してください。
 		return true;
 	}
 
-	#--------------------------------------
-	#	config:設定値を取得
-	function get_conf( $key ){
+	/**
+	 * config:設定値を取得
+	 */
+	public function get_conf( $key ){
 		return	$this->pcconf->get_value( $key );
 	}
 

@@ -3,9 +3,10 @@
 #	Copyright (C)Tomoya Koyanagi.
 #	Last Update : 6:44 2009/08/27
 
-#******************************************************************************************************************
-#	機能設定
-class base_plugins_PicklesCrawler_config{
+/**
+ * 機能設定
+ */
+class pxplugin_PicklesCrawler_config{
 
 	var $conf;
 	var $errors;
@@ -46,9 +47,10 @@ class base_plugins_PicklesCrawler_config{
 	#	/ 設定項目
 	#--------------------------------------
 
-	#--------------------------------------
-	#	コンストラクタ
-	function base_plugins_PicklesCrawler_config( &$conf , &$errors , &$dbh , &$req , &$user , &$site , &$theme , &$custom ){
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$conf , &$errors , &$dbh , &$req , &$user , &$site , &$theme , &$custom ){
 		$this->conf = &$conf;
 		$this->errors = &$errors;
 		$this->dbh = &$dbh;

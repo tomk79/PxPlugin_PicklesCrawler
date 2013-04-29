@@ -12,7 +12,7 @@
 #	他のクラスに依存することなく単体で動作することができます。
 #	オリジナルのクラス名は PxHTTPAccess となっていますが、
 #	環境に合わせて任意に変更しても動作します。
-class base_plugins_PicklesCrawler_resources_httpaccess{
+class pxplugin_PicklesCrawler_resources_httpaccess{
 
 	var $http_connection_resource = null;//コネクションリソース
 

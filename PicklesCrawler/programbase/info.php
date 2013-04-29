@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	各プログラム情報クラスの基底クラス
-class base_plugins_PicklesCrawler_programbase_info{
+class pxplugin_PicklesCrawler_programbase_info{
 
 	var $program_type_name = 'No Titled';
 

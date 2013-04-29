@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	モデル：プロジェクト
-class base_plugins_PicklesCrawler_model_project{
+class pxplugin_PicklesCrawler_model_project{
 
 	var $conf;
 	var $errors;
@@ -37,7 +37,7 @@ class base_plugins_PicklesCrawler_model_project{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function base_plugins_PicklesCrawler_model_project( &$conf , &$pcconf , &$errors , &$dbh ){
+	function pxplugin_PicklesCrawler_model_project( &$conf , &$pcconf , &$errors , &$dbh ){
 		$this->conf = &$conf;
 		$this->pcconf = &$pcconf;
 		$this->errors = &$errors;

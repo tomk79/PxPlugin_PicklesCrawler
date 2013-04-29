@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	インポート・エクスポート
-class base_plugins_PicklesCrawler_resources_io{
+class pxplugin_PicklesCrawler_resources_io{
 
 	var $pcconf;
 	var $conf;
@@ -14,7 +14,7 @@ class base_plugins_PicklesCrawler_resources_io{
 
 	#----------------------------------------------------------------------------
 	#	コンストラクタ
-	function base_plugins_PicklesCrawler_resources_io( &$pcconf ){
+	function pxplugin_PicklesCrawler_resources_io( &$pcconf ){
 		$this->pcconf = &$pcconf;
 		$this->conf = &$pcconf->get_basicobj_conf();
 		$this->errors = &$pcconf->get_basicobj_errors();

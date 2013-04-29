@@ -5,7 +5,7 @@
 
 #******************************************************************************************************************
 #	zip形式のファイルの結合・展開
-class base_plugins_PicklesCrawler_resources_zip{
+class pxplugin_PicklesCrawler_resources_zip{
 
 	var $conf;
 	var $dbh;
@@ -15,7 +15,7 @@ class base_plugins_PicklesCrawler_resources_zip{
 
 	#----------------------------------------------------------------------------
 	#	コンストラクタ
-	function base_plugins_PicklesCrawler_resources_zip( &$conf , &$dbh , &$errors ){
+	function pxplugin_PicklesCrawler_resources_zip( &$conf , &$dbh , &$errors ){
 		$this->conf = &$conf;
 		$this->dbh = &$dbh;
 		$this->errors = &$errors;

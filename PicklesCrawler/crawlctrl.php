@@ -3,9 +3,10 @@
 #	Copyright (C)Tomoya Koyanagi.
 #	Last Update: 12:53 2011/08/28
 
-#******************************************************************************************************************
-#	クロールコントロール
-class base_plugins_PicklesCrawler_crawlctrl{
+/**
+ * クロールコントロール
+ */
+class pxplugin_PicklesCrawler_crawlctrl{
 
 	var $conf;
 	var $errors;
@@ -26,9 +27,10 @@ class base_plugins_PicklesCrawler_crawlctrl{
 	var $crawl_starttime = 0;//クロール開始時刻
 	var $crawl_endtime = 0;//クロール終了時刻
 
-	#--------------------------------------
-	#	コンストラクタ
-	function base_plugins_PicklesCrawler_crawlctrl( &$pcconf ){
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$pcconf ){
 		$this->pcconf = &$pcconf;
 		$this->conf = &$pcconf->get_basicobj_conf();
 		$this->errors = &$pcconf->get_basicobj_errors();
@@ -49,16 +51,19 @@ class base_plugins_PicklesCrawler_crawlctrl{
 
 		$this->additional_constructor();
 	}
-	#--------------------------------------
-	#	コンストラクタの追加処理
-	function additional_constructor(){
+
+	/**
+	 * コンストラクタの追加処理
+	 */
+	private function additional_constructor(){
 		#	必要に応じて拡張してください。
 	}
 
 
-	#--------------------------------------
-	#	ファクトリ：HTTPアクセスオブジェクト
-	function &factory_httpaccess(){
+	/**
+	 * ファクトリ：HTTPアクセスオブジェクト
+	 */
+	public function &factory_httpaccess(){
 		$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/httpaccess.php' );
 		if( !$className ){
 			$this->error_log( 'HTTPアクセスオブジェクトのロードに失敗しました。' , __FILE__ , __LINE__ );
