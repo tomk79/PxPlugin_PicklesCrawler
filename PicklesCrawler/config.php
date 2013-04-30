@@ -32,6 +32,11 @@ class pxplugin_PicklesCrawler_config{
 		#	ダウンロードリストCSVの文字コード。
 		#	null を指定すると、mb_internal_encoding() になる。
 
+	private $path_commands = array(
+		'php'=>'php' ,
+		'tar'=>'tar' ,
+	);
+
 	#	/ 設定項目
 	#--------------------------------------
 
@@ -144,6 +149,15 @@ class pxplugin_PicklesCrawler_config{
 	}
 
 
+	/**
+	 * コマンドのパスを取得する
+	 */
+	public function get_path_command($cmd){
+		if( !strlen( $this->path_commands[$cmd] ) ){
+			return false;
+		}
+		return trim($this->path_commands[$cmd]);
+	}
 
 	/**
 	 * ファクトリ：プロジェクトモデル
@@ -188,12 +202,7 @@ class pxplugin_PicklesCrawler_config{
 
 }
 
-?>---------------------------
-	#	ファクトリ：クローラインスタンスを取得
-	function &factory_crawlctrl(){
-		$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/crawlctrl.php' );
-		if( !$className ){
-			$this->errors->error_log( 'PicklesCrawlerプラグイン「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
+?>イン「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
 			return	false;
 		}
 		$obj = new $className( &$this );

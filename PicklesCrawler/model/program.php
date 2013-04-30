@@ -1,45 +1,43 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update : 2:45 2010/08/03
-
-#******************************************************************************************************************
-#	モデル：プログラム
+/**
+ * モデル：プログラム
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update : 2:45 2010/08/03
+ */
 class pxplugin_PicklesCrawler_model_program{
 
-	var $conf;
-	var $errors;
-	var $dbh;
+	private $px;
 
-	var $pcconf;
-	var $proj;
+	private $pcconf;
+	private $proj;
 
-	var $info_program_id = null;
-	var $info_program_name = null;
-	var $info_program_param = null;//PicklesCrawler 0.3.0 追加
-	var $info_program_type = null;
-	var $info_program_useragent = null;
-	var $info_path_copyto = null;//PicklesCrawler 0.3.3 追加
-	var $info_copyto_apply_deletedfile_flg = null;//PicklesCrawler 0.3.3 追加
-	var $info_urllist_nodownload = array();
-	var $info_urllist_scope = array();
+	private $info_program_id = null;
+	private $info_program_name = null;
+	private $info_program_param = null;//PicklesCrawler 0.3.0 追加
+	private $info_program_type = null;
+	private $info_program_useragent = null;
+	private $info_path_copyto = null;//PicklesCrawler 0.3.3 追加
+	private $info_copyto_apply_deletedfile_flg = null;//PicklesCrawler 0.3.3 追加
+	private $info_urllist_nodownload = array();
+	private $info_urllist_scope = array();
 
-	var $crawl_error_list = array();
+	private $crawl_error_list = array();
 
-	#--------------------------------------
-	#	コンストラクタ
-	function pxplugin_PicklesCrawler_model_program( &$conf , &$pcconf , &$proj , &$errors , &$dbh ){
-		$this->conf = &$conf;
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$px , &$pcconf , &$proj ){
+		$this->px = &$px;
 		$this->pcconf = &$pcconf;
 		$this->proj = &$proj;
-		$this->errors = &$errors;
-		$this->dbh = &$dbh;
 	}
 
 
-	#--------------------------------------
-	#	プログラムをロードする
-	function load_program( $program_id ){
+	/**
+	 * プログラムをロードする
+	 */
+	public function load_program( $program_id ){
 
 		$path_program_dir = $this->pcconf->get_program_home_dir( $this->proj->get_project_id() , $program_id );
 		if( !is_dir( $path_program_dir ) ){
@@ -48,7 +46,9 @@ class pxplugin_PicklesCrawler_model_program{
 
 		$this->info_program_id = $program_id;
 
-		$programInfo = $this->dbh->read_ini( $path_program_dir.'/programinfo.ini' );
+		$programInfo = $this->proj->load_ini( $path_program_dir.'/programinfo.ini' );
+		$programInfo['section'] = $programInfo['sec'];
+
 		$this->set_program_name( $programInfo['common']['name'] );
 		$this->set_program_param( $programInfo['common']['param'] );
 		$this->set_program_type( $programInfo['common']['type'] );
@@ -64,7 +64,7 @@ class pxplugin_PicklesCrawler_model_program{
 		}
 		if( is_file( $path_program_dir.'/url_scope.txt' ) ){
 			#	PxCrawler 0.3.7 追加
-			foreach( $this->dbh->file_get_lines( $path_program_dir.'/url_scope.txt' ) as $url ){
+			foreach( $this->px->dbh()->file_get_lines( $path_program_dir.'/url_scope.txt' ) as $url ){
 				$url = trim( $url );
 				if( !strlen( $url ) ){ continue; }
 				$this->put_urllist_scope( $url );
@@ -79,7 +79,7 @@ class pxplugin_PicklesCrawler_model_program{
 		}
 		if( is_file( $path_program_dir.'/url_nodownload.txt' ) ){
 			#	PxCrawler 0.3.7 追加
-			foreach( $this->dbh->file_get_lines( $path_program_dir.'/url_nodownload.txt' ) as $url ){
+			foreach( $this->px->dbh()->file_get_lines( $path_program_dir.'/url_nodownload.txt' ) as $url ){
 				$url = trim( $url );
 				if( !strlen( $url ) ){ continue; }
 				$this->put_urllist_nodownload( $url );
@@ -89,9 +89,10 @@ class pxplugin_PicklesCrawler_model_program{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	新規プログラムを作成する
-	function create_program(){
+	/**
+	 * 新規プログラムを作成する
+	 */
+	public function create_program(){
 		$program_list = $this->proj->get_program_list();
 		$max_num = 0;
 		foreach( $program_list as $exist_program_id ){
@@ -105,14 +106,15 @@ class pxplugin_PicklesCrawler_model_program{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	プログラムの現在の状態を保存する
-	function save_program(){
+	/**
+	 * プログラムの現在の状態を保存する
+	 */
+	public function save_program(){
 		if( !strlen( $this->info_program_id ) ){ return false; }
 
 		$path_program_dir = $this->pcconf->get_program_home_dir( $this->proj->get_project_id() , $this->get_program_id() );
 		if( !is_dir( $path_program_dir ) ){
-			if( !$this->dbh->mkdir( $path_program_dir ) ){
+			if( !$this->px->dbh()->mkdir( $path_program_dir ) ){
 				return	false;
 			}
 		}
@@ -153,10 +155,10 @@ class pxplugin_PicklesCrawler_model_program{
 #		}
 		$src_programinfo_ini .= ''."\n";
 
-		if( !$this->dbh->savefile( $path_program_dir.'/programinfo.ini' , $src_programinfo_ini ) ){
+		if( !$this->px->dbh()->save_file( $path_program_dir.'/programinfo.ini' , $src_programinfo_ini ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_program_dir.'/programinfo.ini');
+		$this->px->dbh()->fclose($path_program_dir.'/programinfo.ini');
 
 		#	【スコープとするURLリスト】
 		$src_programinfo_ini = '';
@@ -167,10 +169,10 @@ class pxplugin_PicklesCrawler_model_program{
 				$src_programinfo_ini .= trim($url)."\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_program_dir.'/url_scope.txt' , $src_programinfo_ini ) ){
+		if( !$this->px->dbh()->save_file( $path_program_dir.'/url_scope.txt' , $src_programinfo_ini ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_program_dir.'/url_scope.txt');
+		$this->px->dbh()->fclose($path_program_dir.'/url_scope.txt');
 
 		#	【ダウンロードしないURLリスト】
 		$src_programinfo_ini = '';
@@ -181,23 +183,24 @@ class pxplugin_PicklesCrawler_model_program{
 				$src_programinfo_ini .= trim($url)."\n";
 			}
 		}
-		if( !$this->dbh->savefile( $path_program_dir.'/url_nodownload.txt' , $src_programinfo_ini ) ){
+		if( !$this->px->dbh()->save_file( $path_program_dir.'/url_nodownload.txt' , $src_programinfo_ini ) ){
 			return	false;
 		}
-		$this->dbh->fclose($path_program_dir.'/url_nodownload.txt');
+		$this->px->dbh()->fclose($path_program_dir.'/url_nodownload.txt');
 
 		return	true;
 	}
 
-	#--------------------------------------
-	#	プログラムが保存したコンテンツを削除する
-	function delete_program_content(){
+	/**
+	 * プログラムが保存したコンテンツを削除する
+	 */
+	public function delete_program_content(){
 		if( !strlen( $this->proj->get_project_id() ) ){
-			$this->errors->error_log( 'プロジェクトが選択される前に、プログラムコンテンツの削除を要求されました。' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'プロジェクトが選択される前に、プログラムコンテンツの削除を要求されました。' , __FILE__ , __LINE__ );
 			return	false;
 		}
 		if( !strlen( $this->info_program_id ) ){
-			$this->errors->error_log( 'プログラムが選択される前に、プログラムコンテンツの削除を要求されました。' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'プログラムが選択される前に、プログラムコンテンツの削除を要求されました。' , __FILE__ , __LINE__ );
 			return	false;
 		}
 
@@ -211,7 +214,7 @@ class pxplugin_PicklesCrawler_model_program{
 		}
 
 		set_time_limit(0);
-		$result = $this->dbh->rmdir( $path_program_dir );
+		$result = $this->px->dbh()->rmdir_all( $path_program_dir );
 		set_time_limit(30);
 		if( $result === false ){
 			return	false;
@@ -220,9 +223,10 @@ class pxplugin_PicklesCrawler_model_program{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	プログラムを削除する
-	function destroy_program(){
+	/**
+	 * プログラムを削除する
+	 */
+	public function destroy_program(){
 		if( !strlen( $this->proj->get_project_id() ) ){ return false; }
 		if( !strlen( $this->get_program_id() ) ){ return false; }
 
@@ -231,7 +235,7 @@ class pxplugin_PicklesCrawler_model_program{
 			return false;
 		}
 
-		$result = $this->dbh->rmdir( $path_program_dir );
+		$result = $this->px->dbh()->rmdir_all( $path_program_dir );
 		if( !$result ){
 			return	false;
 		}
@@ -240,9 +244,10 @@ class pxplugin_PicklesCrawler_model_program{
 	}
 
 
-	#--------------------------------------
-	#	クロール時に発生したエラーをログに残す
-	function crawl_error( $errormsg , $url = null , $save_to = null ){
+	/**
+	 * クロール時に発生したエラーをログに残す
+	 */
+	public function crawl_error( $errormsg , $url = null , $save_to = null ){
 		if( !is_array( $this->crawl_error_list ) ){
 			#	PicklesCrawler 0.3.0 追加
 			$this->crawl_error_list = array();
@@ -252,11 +257,11 @@ class pxplugin_PicklesCrawler_model_program{
 		$path_program_dir = $this->pcconf->get_program_home_dir( $this->proj->get_project_id() , $this->get_program_id() );
 		$path_crawl_error_log = $path_program_dir.'/dl/__LOGS__/crawlerror.log';
 		if( !is_dir( dirname( $path_crawl_error_log ) ) || !is_writable( dirname( $path_crawl_error_log ) ) ){
-			$this->errors->error_log( 'Faild to save crawl error log. Directory ['.dirname( $path_crawl_error_log ).'] is NOT exists, or NOT writable.' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'Faild to save crawl error log. Directory ['.dirname( $path_crawl_error_log ).'] is NOT exists, or NOT writable.' , __FILE__ , __LINE__ );
 			return	false;
 		}
 		if( is_file( $path_crawl_error_log ) && !is_writable( $path_crawl_error_log ) ){
-			$this->errors->error_log( 'Faild to save crawl error log. File ['.$path_crawl_error_log.'] is NOT writable.' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'Faild to save crawl error log. File ['.$path_crawl_error_log.'] is NOT writable.' , __FILE__ , __LINE__ );
 			return	false;
 		}
 
@@ -269,69 +274,89 @@ class pxplugin_PicklesCrawler_model_program{
 		@chmod( $path_crawl_error_log , 0777 );
 		return	$result;
 	}
-	#--------------------------------------
-	#	クロール時に発生したエラーを取得する
-	#	PicklesCrawler 0.3.0 追加
-	function get_crawl_error(){
+	/**
+	 * クロール時に発生したエラーを取得する
+	 * PicklesCrawler 0.3.0 追加
+	 */
+	public function get_crawl_error(){
 		return	$this->crawl_error_list;
 	}
-	#--------------------------------------
-	#	クロール時に発生したエラーを消去する
-	#	PicklesCrawler 0.3.0 追加
-	function clear_crawl_error(){
+	/**
+	 * クロール時に発生したエラーを消去する
+	 * PicklesCrawler 0.3.0 追加
+	 */
+	public function clear_crawl_error(){
 		$this->crawl_error_list = array();
 		return	true;
 	}
 
 
-	#--------------------------------------
-	#	プログラムIDの入出力
-	function get_program_id(){
+	/**
+	 * プログラムIDの出力
+	 */
+	public function get_program_id(){
 		return	$this->info_program_id;
 	}
 
 
-	#--------------------------------------
-	#	プログラム名の入出力
-	function set_program_name( $program_name ){
+	/**
+	 * プログラム名の入力
+	 */
+	public function set_program_name( $program_name ){
 		$this->info_program_name = $program_name;
 		return	true;
 	}
-	function get_program_name(){
+	/**
+	 * プログラム名の出力
+	 */
+	public function get_program_name(){
 		return	$this->info_program_name;
 	}
 
 
-	#--------------------------------------
-	#	常に送信するパラメータの入出力
-	#	PicklesCrawler 0.3.0 追加
-	function set_program_param( $program_param ){
+	/**
+	 * 常に送信するパラメータの入力
+	 * PicklesCrawler 0.3.0 追加
+	 */
+	public function set_program_param( $program_param ){
 		$this->info_program_param = $program_param;
 		return	true;
 	}
-	function get_program_param(){
+	/**
+	 * 常に送信するパラメータの出力
+	 * PicklesCrawler 0.3.0 追加
+	 */
+	public function get_program_param(){
 		return	$this->info_program_param;
 	}
 
 
-	#--------------------------------------
-	#	プログラムタイプの入出力
-	function set_program_type( $program_type ){
+	/**
+	 * プログラムタイプの入力
+	 */
+	public function set_program_type( $program_type ){
 		$this->info_program_type = $program_type;
 		return	true;
 	}
-	function get_program_type(){
+	/**
+	 * プログラムタイプの出力
+	 */
+	public function get_program_type(){
 		return	$this->info_program_type;
 	}
 
 
-	#--------------------------------------
-	#	HTTP_USER_AGENTの入出力
-	function set_program_useragent( $value ){
+	/**
+	 * HTTP_USER_AGENTの入力
+	 */
+	public function set_program_useragent( $value ){
 		$this->info_program_useragent = $value;
 		return	true;
 	}
-	function get_program_useragent(){
+	/**
+	 * HTTP_USER_AGENTの出力
+	 */
+	public function get_program_useragent(){
 		return	$this->info_program_useragent;
 	}
 

@@ -50,7 +50,7 @@ class pxplugin_PicklesCrawler_model_project{
 		if( !$className ){
 			$this->px->error()->error_log( 'プログラムオブジェクトのロードに失敗しました。['.$objPath.']' , __FILE__ , __LINE__ );
 		}
-		$obj = new $className( $this->conf , $this->pcconf , $this , $this->errors , $this->dbh );
+		$obj = new $className( $this->px , $this->pcconf , $this );
 		if( strlen( $program_id ) ){
 			$obj->load_program( $program_id );
 		}else{
