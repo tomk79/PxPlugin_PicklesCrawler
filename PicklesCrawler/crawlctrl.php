@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * クロールコントロール
  * Copyright (C)Tomoya Koyanagi.
@@ -21,6 +20,8 @@ class pxplugin_PicklesCrawler_crawlctrl{
 	private $crawl_starttime = 0;//クロール開始時刻
 	private $crawl_endtime = 0;//クロール終了時刻
 
+	private $output_encoding = 'UTF-8';// 出力文字セット
+
 	/**
 	 * コンストラクタ
 	 */
@@ -30,29 +31,20 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$this->cmd = &$cmd;
 
 		$this->project_model = &$this->pcconf->factory_model_project();
-		$this->project_model->load_project( $this->req->pvelm() );
-		$this->program_model = $this->project_model->factory_program( $this->req->pvelm(1) );
+		$this->project_model->load_project( $this->cmd[1] );
+		$this->program_model = $this->project_model->factory_program( $this->cmd[2] );
 
-		if( strlen( $this->req->in('crawl_max_url_number') ) ){
-			$this->pcconf->set_value( 'crawl_max_url_number' , intval( $this->req->in('crawl_max_url_number') ) );
+		if( strlen( $this->px->req()->get_param('crawl_max_url_number') ) ){
+			$this->pcconf->set_value( 'crawl_max_url_number' , intval( $this->px->req()->get_param('crawl_max_url_number') ) );
 		}
 
-		$this->additional_constructor();
 	}
-
-	/**
-	 * コンストラクタの追加処理
-	 */
-	private function additional_constructor(){
-		#	必要に応じて拡張してください。
-	}
-
 
 	/**
 	 * ファクトリ：HTTPアクセスオブジェクト
 	 */
-	public function &factory_httpaccess(){
-		$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/httpaccess.php' );
+	private function &factory_httpaccess(){
+		$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/httpaccess.php' );
 		if( !$className ){
 			$this->error_log( 'HTTPアクセスオブジェクトのロードに失敗しました。' , __FILE__ , __LINE__ );
 			return	$this->exit_process();
@@ -62,10 +54,11 @@ class pxplugin_PicklesCrawler_crawlctrl{
 	}
 
 
-	#--------------------------------------
-	#	ファクトリ：HTMLメタ情報抽出オブジェクト
-	function &factory_parsehtmlmetainfo(){
-		$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/parsehtmlmetainfo.php' );
+	/**
+	 * ファクトリ：HTMLメタ情報抽出オブジェクト
+	 */
+	private function &factory_parsehtmlmetainfo(){
+		$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/parsehtmlmetainfo.php' );
 		if( !$className ){
 			$this->error_log( 'HTMLメタ情報抽出オブジェクトのロードに失敗しました。' , __FILE__ , __LINE__ );
 			return	$this->exit_process();
@@ -74,16 +67,17 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	$obj;
 	}
 
-	#--------------------------------------
-	#	ファクトリ：プログラムオペレータ
-	function &factory_program_operator( $type , $kind = 'execute' ){
-		$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/program/'.$type.'/'.$kind.'.php' );
+	/**
+	 * ファクトリ：プログラムオペレータ
+	 */
+	private function &factory_program_operator( $type , $kind = 'execute' ){
+		$className = $this->px->load_px_plugin_class( '/PicklesCrawler/program/'.$type.'/'.$kind.'.php' );
 		if( !$className ){
 			$this->error_log( 'プログラムオペレータオブジェクト('.$type.'/'.$kind.')のロードに失敗しました。' , __FILE__ , __LINE__ );
 			return	$this->exit_process();
 		}
 		if( $kind == 'execute' ){
-			$obj = new $className( &$this->conf , &$this->pcconf , &$this->project_model , &$this->program_model , &$this->errors , &$this->dbh , &$this->req );
+			$obj = new $className( $this->px , $this->pcconf , $this->project_model , $this->program_model );
 		}elseif( $kind == 'info' ){
 			$obj = new $className();
 		}else{
@@ -98,25 +92,29 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 
 	#########################################################################################################################################################
-	#	処理の開始
-	function start(){
-		if( strlen( $this->req->in('output_encoding') ) ){
-			$this->theme->set_output_encoding( $this->req->in('output_encoding') );
+
+
+	/**
+	 * 処理の開始
+	 */
+	public function start(){
+		if( strlen( $this->px->req()->get_param('output_encoding') ) ){
+			$this->output_encoding = $this->px->req()->get_param('output_encoding');
 		}
-		if( !is_null( $this->req->in('-f') ) ){
+		if( !is_null( $this->px->req()->get_param('-f') ) ){
 			#	-fオプション(force)が指定されていたら、
 			#	アプリケーションロックを無視する。
 			$this->unlock();
 		}
 
 		while( @ob_end_clean() );//出力バッファをクリア
-		@header( 'Content-type: text/plain; charset='.$this->theme->get_output_encoding() );
+		@header( 'Content-type: text/plain; charset='.$this->output_encoding );
 
-		if( !strlen( $this->req->pvelm() ) ){
+		if( !strlen( $this->cmd[1] ) ){
 			$this->msg( '[ERROR!!] プロジェクトIDが指定されていません。' );
 			return	$this->exit_process();
 		}
-		if( !strlen( $this->req->pvelm(1) ) ){
+		if( !strlen( $this->cmd[2] ) ){
 			$this->msg( '[ERROR!!] プログラムIDが指定されていません。' );
 			return	$this->exit_process();
 		}
@@ -127,8 +125,12 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 
 	#########################################################################################################################################################
-	#	コントローラ
-	function controll(){
+
+
+	/**
+	 * コントローラ
+	 */
+	private function controll(){
 
 		$project_model = &$this->project_model;
 		$program_model = &$this->program_model;
@@ -158,7 +160,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#	ダウンロード先のパス内を一旦削除
 		$path_dir_download_to = $this->get_path_download_to();
 		if( is_dir( $path_dir_download_to ) ){
-			$filelist = $this->dbh->getfilelist( $path_dir_download_to );
+			$filelist = $this->px->dbh()->ls( $path_dir_download_to );
 			if( count( $filelist ) ){
 				$this->msg( '--------------------------------------' );
 				$this->msg( 'Cleanning directory ['.$path_dir_download_to.']...' );
@@ -166,7 +168,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				foreach( $filelist as $filename ){
 					if( $filename == '..' || $filename == '.' ){ continue; }
 					if( $filename == 'crawl.lock' ){ continue; } //ロックファイルは消しちゃダメ。
-					if( !$this->dbh->rmdir( $path_dir_download_to.'/'.$filename ) ){
+					if( !$this->px->dbh()->rmdir_all( $path_dir_download_to.'/'.$filename ) ){
 						$this->error_log( 'Delete ['.$filename.'] FAILD.' , __FILE__ , __LINE__ );
 						return	$this->exit_process();
 					}else{
@@ -179,7 +181,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 		$this->msg( '--------------------------------------' );
 		$this->crawl_starttime = time();
-		$this->msg( '*** Start of Crawling --- '.time::int2datetime( $this->crawl_starttime ) );
+		$this->msg( '*** Start of Crawling --- '.$this->px->dbh()->int2datetime( $this->crawl_starttime ) );
 		$this->msg( '' );
 
 		#--------------------------------------
@@ -221,7 +223,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 		#######################################
 		#	クロールの設定をログに残す
-		$this->save_crawl_settings( &$project_model , &$program_model );
+		$this->save_crawl_settings( $project_model , $program_model );
 
 		#######################################
 		#	HTTPリクエストオブジェクトを生成
@@ -325,7 +327,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				$httpaccess->set_url( $tmp_url );
 				$httpaccess->save_http_contents( $fullpath_savetmpfile_to );
 
-				$this->dbh->fclose( $fullpath_savetmpfile_to );//ファイルを閉じておかないと、programに追記されちゃう。
+				$this->px->dbh()->fclose( $fullpath_savetmpfile_to );//ファイルを閉じておかないと、programに追記されちゃう。
 				#	/ HTTPアクセス実行
 				#--------------------------------------
 
@@ -355,7 +357,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 							$this->error_log( 'ダウンロード先にファイルは存在せず、親ディレクトリに書き込み権限がありません。' , __FILE__ , __LINE__ );
 						}
 					}else{
-						if( !$this->dbh->mkdirall( dirname( $fullpath_save_to ) ) || !is_dir( dirname( $fullpath_save_to ) ) ){
+						if( !$this->px->dbh()->mkdir_all( dirname( $fullpath_save_to ) ) || !is_dir( dirname( $fullpath_save_to ) ) ){
 							$this->error_log( 'ダウンロード先ディレクトリの作成に失敗しました。' , __FILE__ , __LINE__ );
 						}
 					}
@@ -487,7 +489,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				#--------------------------------------
 				#	オペレータをロードして実行
 				$operator = &$this->factory_program_operator( $program_model->get_program_type() );
-				if( !$operator->execute( &$httpaccess , $url , realpath( $fullpath_save_to ) , $url_property ) ){
+				if( !$operator->execute( $httpaccess , $url , realpath( $fullpath_save_to ) , $url_property ) ){
 					$this->error_log( 'FAILD to Executing in operator object.' , __FILE__ , __LINE__ );
 					return	$this->exit_process();
 				}
@@ -601,13 +603,13 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				$this->msg( '複製先パス：'.$path_copyto );
 				if( strlen( $path_copyfrom ) && is_dir( $path_copyfrom ) ){
 					set_time_limit(0);
-					if( $this->dbh->copyall( $path_copyfrom , $path_copyto ) ){
+					if( $this->px->dbh()->copyall( $path_copyfrom , $path_copyto ) ){
 						$this->msg( 'コンテンツの複製を完了しました。' );
 						if( $copyto_apply_deletedfile_flg ){
 							$this->msg( '------' );
 							$this->msg( '削除されたファイル/ディレクトリを反映します。' );
 							set_time_limit(0);
-							if( $this->dbh->compare_and_cleanup( $path_copyto , $path_copyfrom ) ){
+							if( $this->px->dbh()->compare_and_cleanup( $path_copyto , $path_copyfrom ) ){
 								$this->msg( '削除されたファイル/ディレクトリを反映しました。' );
 							}else{
 								$this->error_log( '削除されたファイル/ディレクトリ反映に失敗しました。' , __FILE__ , __LINE__ );
@@ -683,7 +685,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#--------------------------------------
 
 		clearstatcache();
-		$SRC = $this->dbh->file_get_contents( $path_targetfile );
+		$SRC = $this->px->dbh()->file_get_contents( $path_targetfile );
 
 		#--------------------------------------
 		#	文字コードを変換
@@ -698,7 +700,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 					$charset_to = 'eucJP-win';
 					break;
 			}
-			$SRC = text::convert_encoding( $SRC , $charset_to );
+			$SRC = t::convert_encoding( $SRC , $charset_to );
 			switch( strtolower( $pathinfo['extension'] ) ){
 				case 'html':
 				case 'htm':
@@ -742,8 +744,8 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#	/ 改行コードを変換
 		#--------------------------------------
 
-		$result = $this->dbh->savefile( $path_targetfile , $SRC );
-		$this->dbh->fclose( $path_targetfile );
+		$result = $this->px->dbh()->save_file( $path_targetfile , $SRC );
+		$this->px->dbh()->fclose( $path_targetfile );
 		clearstatcache();
 		if( !$result ){
 			return	false;
@@ -779,10 +781,10 @@ class pxplugin_PicklesCrawler_crawlctrl{
 			return false;
 		}
 		$localpath_targetfile = preg_replace( '/\\\\|\//' , '/' , $localpath_targetfile );//ディレクトリの区切り文字をスラッシュに変換
-		$path_dir_download_to = $this->dbh->get_realpath( $path_dir_download_to );
+		$path_dir_download_to = $this->px->dbh()->get_realpath( $path_dir_download_to );
 
 		clearstatcache();
-		$SRC = $this->dbh->file_get_contents( $path_targetfile );
+		$SRC = $this->px->dbh()->file_get_contents( $path_targetfile );
 
 		#--------------------------------------
 		#	置換ルールを一つずつ処理
@@ -848,8 +850,8 @@ class pxplugin_PicklesCrawler_crawlctrl{
 			$SRC = @preg_replace( $rule['pregpattern'] , $rule['replaceto'] , $SRC );
 		}
 
-		$result = $this->dbh->savefile( $path_targetfile , $SRC );
-		$this->dbh->fclose( $path_targetfile );
+		$result = $this->px->dbh()->save_file( $path_targetfile , $SRC );
+		$this->px->dbh()->fclose( $path_targetfile );
 		clearstatcache();
 		if( !$result ){
 			return	false;
@@ -955,12 +957,12 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 	#	ダウンロード先のディレクトリパスを得る
 	function get_path_download_to(){
-		$path = $this->pcconf->get_program_home_dir( $this->req->pvelm() , $this->req->pvelm(1) );
+		$path = $this->pcconf->get_program_home_dir( $this->cmd[1] , $this->cmd[2] );
 		if( !is_dir( $path ) ){ return false; }
 
 		$RTN = realpath( $path ).'/dl';
 		if( !is_dir( $RTN ) ){
-			if( !$this->dbh->mkdir( $RTN ) ){
+			if( !$this->px->dbh()->mkdir( $RTN ) ){
 				return	false;
 			}
 		}
@@ -973,7 +975,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
-			if( !$this->dbh->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
+			if( !$this->px->dbh()->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
 				return	false;
 			}
 		}
@@ -993,22 +995,23 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#	/ 行の文字コードを調整
 		#--------------------------------------
 
-		$csv_line = $this->dbh->mk_csv( array( $array_csv_line ) , $csv_charset );
+		$csv_line = $this->px->dbh()->mk_csv( array( $array_csv_line ) , $csv_charset );
 
 		error_log( $csv_line , 3 , $path_dir_download_to.'/__LOGS__/download_list.csv' );
-		$this->dbh->chmod( $path_dir_download_to.'/__LOGS__/download_list.csv' );
+		$this->px->dbh()->chmod( $path_dir_download_to.'/__LOGS__/download_list.csv' );
 
 		return	true;
 	}//save_executed_url_row();
 
-	#--------------------------------------
-	#	クロールの設定をログに残す
-	function save_crawl_settings( &$project_model , &$program_model ){
+	/**
+	 * クロールの設定をログに残す
+	 */
+	private function save_crawl_settings( &$project_model , &$program_model ){
 		// PicklesCrawler 0.4.2 追加
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
-			if( !$this->dbh->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
+			if( !$this->px->dbh()->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
 				return	false;
 			}
 		}
@@ -1125,19 +1128,19 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$FIN .= ''."\n";
 
 		error_log( $FIN , 3 , $path_dir_download_to.'/__LOGS__/settings.txt' );
-		$this->dbh->chmod( $path_dir_download_to.'/__LOGS__/settings.txt' );
+		$this->px->dbh()->chmod( $path_dir_download_to.'/__LOGS__/settings.txt' );
 
 		return	true;
 	}//save_crawl_settings();
 
-	#--------------------------------------
-	#	サイトマップXMLを保存する系
-	#	先頭
-	function start_sitemap(){
+	/**
+	 * サイトマップXMLを保存する系: 先頭
+	 */
+	private function start_sitemap(){
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
-			if( !$this->dbh->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
+			if( !$this->px->dbh()->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
 				return	false;
 			}
 		}
@@ -1147,16 +1150,18 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$LINE .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
 
 		error_log( $LINE , 3 , $path_dir_download_to.'/__LOGS__/sitemap.xml' );
-		$this->dbh->chmod( $path_dir_download_to.'/__LOGS__/sitemap.xml' );
+		$this->px->dbh()->chmod( $path_dir_download_to.'/__LOGS__/sitemap.xml' );
 
 		return	true;
 	}
-	#	URLを追加
-	function add_sitemap_url( $url ){
+	/**
+	 * サイトマップXMLを保存する系: URLを追加
+	 */
+	private function add_sitemap_url( $url ){
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
-			if( !$this->dbh->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
+			if( !$this->px->dbh()->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
 				return	false;
 			}
 		}
@@ -1173,12 +1178,14 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 		return	true;
 	}
-	#	閉じる
-	function close_sitemap(){
+	/**
+	 * サイトマップXMLを保存する系: 閉じる
+	 */
+	private function close_sitemap(){
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
-			if( !$this->dbh->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
+			if( !$this->px->dbh()->mkdir( $path_dir_download_to.'/__LOGS__' ) ){
 				return	false;
 			}
 		}
@@ -1187,38 +1194,41 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$LINE .= '</urlset>';
 
 		error_log( $LINE , 3 , $path_dir_download_to.'/__LOGS__/sitemap.xml' );
-		$this->dbh->chmod( $path_dir_download_to.'/__LOGS__/sitemap.xml' );
+		$this->px->dbh()->chmod( $path_dir_download_to.'/__LOGS__/sitemap.xml' );
 
 		return	true;
 	}
 
 
 
-	#--------------------------------------
-	#	開始と終了の時刻を保存する
-	function save_start_and_end_datetime( $start_time , $end_time ){
+	/**
+	 * 開始と終了の時刻を保存する
+	 */
+	private function save_start_and_end_datetime( $start_time , $end_time ){
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		$CONTENT = '';
-		$CONTENT .= time::int2datetime( $start_time );
+		$CONTENT .= $this->px->dbh()->int2datetime( $start_time );
 		$CONTENT .= ' --- ';
-		$CONTENT .= time::int2datetime( $end_time );
-		$result = $this->dbh->savefile( $path_dir_download_to.'/__LOGS__/datetime.txt' , $CONTENT );
-		$this->dbh->fclose( $path_dir_download_to.'/__LOGS__/datetime.txt' );
+		$CONTENT .= $this->px->dbh()->int2datetime( $end_time );
+		$result = $this->px->dbh()->save_file( $path_dir_download_to.'/__LOGS__/datetime.txt' , $CONTENT );
+		$this->px->dbh()->fclose( $path_dir_download_to.'/__LOGS__/datetime.txt' );
 		return	$result;
 	}
 
-	#--------------------------------------
-	#	エラーログを残す
-	function error_log( $msg , $file = null , $line = null ){
-		$this->errors->error_log( $msg , $file , $line );
+	/**
+	 * エラーログを残す
+	 */
+	private function error_log( $msg , $file = null , $line = null ){
+		$this->px->error()->error_log( $msg , $file , $line );
 		$this->msg( '[--ERROR!!--] '.$msg );
 		return	true;
 	}
-	#--------------------------------------
-	#	メッセージを出力する
-	function msg( $msg ){
-		$msg = text::convert_encoding( $msg , $this->theme->get_output_encoding() , mb_internal_encoding() );
-		if( $this->req->is_cmd() ){
+	/**
+	 * メッセージを出力する
+	 */
+	private function msg( $msg ){
+		$msg = t::convert_encoding( $msg , $this->output_encoding , mb_internal_encoding() );
+		if( $this->px->req()->is_cmd() ){
 			print	$msg."\n";
 		}else{
 			print	$msg."\n";
@@ -1227,24 +1237,29 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	プロセスを終了する
-	function exit_process( $is_unlock = true ){
+	/**
+	 * プロセスを終了する
+	 */
+	private function exit_process( $is_unlock = true ){
 		if( $is_unlock ){
 			if( !$this->unlock() ){
 				$this->error_log( 'FAILD to unlock!' , __FILE__ , __LINE__ );
 			}
 		}
 		$this->crawl_endtime = time();
-		$this->msg( '*** Exit --- '.time::int2datetime( $this->crawl_endtime ) );
+		$this->msg( '*** Exit --- '.$this->px->dbh()->int2datetime( $this->crawl_endtime ) );
 		$this->save_start_and_end_datetime( $this->crawl_starttime , $this->crawl_endtime );//←開始、終了時刻の記録
-		return	$this->theme->print_and_exit( '' );
+		exit;
+		//return	$this->px->theme()->print_and_exit( '' );
 	}
 
 
 	###################################################################################################################
-	#	キャンセルリクエスト
-	function request_cancel(){
+
+	/**
+	 * キャンセルリクエスト
+	 */
+	public function request_cancel(){
 		$path = realpath( $this->get_path_download_to() ).'/__LOGS__/cancel.request';
 		if( !is_dir( dirname( $path ) ) ){
 			return	false;
@@ -1254,38 +1269,39 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		}elseif( !is_writable( dirname( $path ) ) ){
 			return	false;
 		}
-		$this->dbh->savefile( $path , 'Cancel request: '.date('Y-m-d H:i:s')."\n" );
-		$this->dbh->fclose( $path );
+		$this->px->dbh()->save_file( $path , 'Cancel request: '.date('Y-m-d H:i:s')."\n" );
+		$this->px->dbh()->fclose( $path );
 		return	true;
 	}
-	function is_request_cancel(){
+	private function is_request_cancel(){
 		$path = realpath( $this->get_path_download_to() ).'/__LOGS__/cancel.request';
 		if( is_file( $path ) ){
 			return	true;
 		}
 		return	false;
 	}
-	function delete_request_cancel(){
+	public function delete_request_cancel(){
 		$path = realpath( $this->get_path_download_to() ).'/__LOGS__/cancel.request';
 		if( !is_file( $path ) ){
 			return	true;
 		}elseif( !is_writable( $path ) ){
 			return	false;
 		}
-		return	$this->dbh->rmdir( $path );
+		return	$this->px->dbh()->rmdir_all( $path );
 	}
 
 
 	###################################################################################################################
 	#	アプリケーションロック
 
-	#--------------------------------------
-	#	アプリケーションをロックする
-	function lock(){
+	/**
+	 * アプリケーションをロックする
+	 */
+	private function lock(){
 		$lockfilepath = $this->get_path_lockfile();
 
 		if( !@is_dir( dirname( $lockfilepath ) ) ){
-			$this->dbh->mkdirall( dirname( $lockfilepath ) );
+			$this->px->dbh()->mkdir_all( dirname( $lockfilepath ) );
 		}
 
 		#	PHPのFileStatusCacheをクリア
@@ -1301,14 +1317,15 @@ class pxplugin_PicklesCrawler_crawlctrl{
 			}
 		}
 
-		$result = $this->dbh->savefile( $lockfilepath , 'This lockfile created at: '.date( 'Y-m-d H:i:s' , time() ).'; Process ID: ['.getmypid().'];'."\n" );
-		$this->dbh->fclose( $lockfilepath );
+		$result = $this->px->dbh()->save_file( $lockfilepath , 'This lockfile created at: '.date( 'Y-m-d H:i:s' , time() ).'; Process ID: ['.getmypid().'];'."\n" );
+		$this->px->dbh()->fclose( $lockfilepath );
 		return	$result;
 	}
 
-	#--------------------------------------
-	#	ロックファイルの更新日時を更新する。
-	function touch_lockfile(){
+	/**
+	 * ロックファイルの更新日時を更新する。
+	 */
+	private function touch_lockfile(){
 		$lockfilepath = $this->get_path_lockfile();
 
 		#	PHPのFileStatusCacheをクリア
@@ -1318,27 +1335,28 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	アプリケーションロックを解除する
-	function unlock(){
+	/**
+	 * アプリケーションロックを解除する
+	 */
+	private function unlock(){
 		$lockfilepath = $this->get_path_lockfile();
 
 		#	PHPのFileStatusCacheをクリア
 		clearstatcache();
 
-		return	$this->dbh->rmdir( $lockfilepath );
+		return	$this->px->dbh()->rmdir_all( $lockfilepath );
 	}
 
-	#--------------------------------------
-	#	ロックファイルのパスを返す
-	function get_path_lockfile(){
+	/**
+	 * ロックファイルのパスを返す
+	 */
+	private function get_path_lockfile(){
 		return	realpath( $this->get_path_download_to() ).'/crawl.lock';
 	}
 
 }
 
-?>��
-	function unlock(){
+?>ck(){
 		$lockfilepath = $this->get_path_lockfile();
 
 		#	PHPのFileStatusCacheをクリア

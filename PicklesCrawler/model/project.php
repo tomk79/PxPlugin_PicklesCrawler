@@ -1114,7 +1114,7 @@ class pxplugin_PicklesCrawler_model_project{
 						$replace_to = urlencode( preg_replace( '/^.*\.(.*?)$/' , '$1' , $PATH ) );
 						break;
 					case 'basename_body':
-						$replace_to = basename( text::trimext( $PATH ) );
+						$replace_to = basename( t::trimext( $PATH ) );
 						break;
 					case 'wildcard':
 						if( intval($rule_result[2][$i]) > 0 ){

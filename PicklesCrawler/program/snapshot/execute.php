@@ -1,24 +1,25 @@
 <?php
+$this->load_px_plugin_class( '/PicklesCrawler/programbase/execute.php' );
 
-#	Copyright (C)Tomoya Koyanagi.
-#	LastUpdate : 11:36 2011/05/20
-
-require_once( $conf->path_lib_base.'/plugins/PicklesCrawler/programbase/execute.php' );
-
-#--------------------------------------
-#	スナップショットの実行
+/**
+ * スナップショットの実行
+ * Copyright (C)Tomoya Koyanagi.
+ * LastUpdate : 11:36 2011/05/20
+ */
 class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesCrawler_programbase_execute{
 
-#	var $debug_mode = true;
+#	private $debug_mode = true;
 		#	デバッグモード。
 		#	開発/デバッグが終了したら、必ずコメントアウトすること。
 
-	var $parse_type = null;
+	private $parse_type = null;
 		#	URL解析のパターン
 
-	#======================================
-	#	ダウンロードされたファイルに対する処理を実行する
-	function execute( &$httpaccess , $current_url , $saved_file_path , $options = array() ){
+
+	/**
+	 * ダウンロードされたファイルに対する処理を実行する
+	 */
+	public function execute( &$httpaccess , $current_url , $saved_file_path , $options = array() ){
 		if( !is_file( $saved_file_path ) || !is_readable( $saved_file_path ) ){
 			return	false;
 		}
@@ -86,7 +87,7 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 		#	/ リライトルールに則った仮想カレントURL
 		#--------------------------------------
 
-		$CONTENTS = $this->dbh->file_get_contents( $saved_file_path );
+		$CONTENTS = $this->px->dbh()->file_get_contents( $saved_file_path );
 			#	$CONTENTSは、ダウンロードしてきたバイナリです。
 
 		if( strlen( $httpaccess->get_response( 'x-pxfw-relatedlink' ) ) ){
@@ -123,15 +124,17 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 
 		#--------------------------------------
 		#	内部から検出されたパスを変換した$CONTENTSを保存しなおす。
-		$result = $this->dbh->savefile( $saved_file_path , $CONTENTS );
-		$this->dbh->fclose( $saved_file_path );
+		$result = $this->px->dbh()->save_file( $saved_file_path , $CONTENTS );
+		$this->px->dbh()->fclose( $saved_file_path );
 
 		$this->msg( 200 , 'OK.');
 		return	true;
-	}
-	#======================================
-	#	ダウンロードされたHTMLファイルに対する処理を実行する
-	function execute_replace_url_html( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
+	}//execute()
+
+	/**
+	 * ダウンロードされたHTMLファイルに対する処理を実行する
+	 */
+	private function execute_replace_url_html( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
 		#--------------------------------------
 		#	タグの属性を変換
 		$RTN = '';
@@ -356,11 +359,12 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 		#--------------------------------------
 
 		return	$CONTENTS;
-	}
+	}//execute_replace_url_html()
 
-	#--------------------------------------
-	#	フォームソースを解析して、送信する値を抽出
-	function get_form_element_values( $CONTENTS ){
+	/**
+	 * フォームソースを解析して、送信する値を抽出
+	 */
+	private function get_form_element_values( $CONTENTS ){
 		$RTN_MEMO = array();
 		while( 1 ){
 			if( !preg_match( '/^(.*?)(<([a-z][a-z0-9]*)(\s.*?)?'.'>)(.*)$/si' , $CONTENTS , $matches ) ){
@@ -481,13 +485,14 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 			array_push( $RTN , urlencode($key).'='.urlencode($val) );
 		}
 		return	implode( '&' , $RTN );
-	}
+	}//get_form_element_values()
 
 
 
-	#======================================
-	#	ダウンロードされたCSSファイルに対する処理を実行する
-	function execute_replace_url_css( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
+	/**
+	 * ダウンロードされたCSSファイルに対する処理を実行する
+	 */
+	private function execute_replace_url_css( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
 
 		$preg_ptn_url = '^(.*?)(?:(\/\*.*?\*\/)|(url\()\s*((?:"|\')?)(.*?)\4\s*(\)))(.*)$';
 		$preg_ptn_import = '^(.*?)(?:(\/\*.*?\*\/)|(\@import(?:\t| )+)((?:"|\'))(.*?)\4(.*?(?:\r\n|\r|\n|\;)))(.*)$';
@@ -565,12 +570,13 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 		}
 
 		return $CONTENTS;
-	}
+	}//execute_replace_url_css()
 
 
-	#======================================
-	#	ダウンロードされたその他ファイルに対する処理を実行する
-	function execute_replace_url_default( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
+	/**
+	 * ダウンロードされたその他ファイルに対する処理を実行する
+	 */
+	private function execute_replace_url_default( $current_url , $CONTENTS , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url ){
 
 		$pregpattern = '/^(.*?)("|\')((?:(?:\.\.?\/|\.?\/|\/|'.preg_quote( $URL_PROTOCOL , '/' ).':\/\/'.preg_quote( $URL_DOMAIN , '/' ).'\/).*?)|[a-zA-Z0-9\-\_\.\/\@]+\.(?:gif|jpg|jpe|jpeg|png|bmp|swf|css|js|txt))\2(.*)$/si';
 		$RTN = '';
@@ -620,7 +626,7 @@ class pxplugin_PicklesCrawler_program_snapshot_execute extends pxplugin_PicklesC
 		}
 		return $RTN;
 
-	}
+	}//execute_replace_url_default()
 
 }
 

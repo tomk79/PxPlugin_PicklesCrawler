@@ -1311,7 +1311,7 @@ class pxplugin_PicklesCrawler_admin{
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
 		// }
 
-		$className = $this->dbh->require_lib('/plugins/PicklesCrawler/resources/io.php');
+		$className = $this->px->load_px_plugin_class('/PicklesCrawler/resources/io.php');
 		if( !$className ){ return $this->theme->errorend('I/Oモジュールをロードできません。',__FILE__,__LINE__); }
 		$io = new $className( $this->pcconf );
 
@@ -1322,7 +1322,7 @@ class pxplugin_PicklesCrawler_admin{
 		$path_export_archive = $io->mk_export_file( $this->px->req()->get_param('ziptype') , array( 'project'=>$this->px->req()->get_param('project') ) );
 		if( $path_export_archive === false ){
 			$this->dbh->unlock();
-			$this->errors->error_log( 'アーカイブの作成に失敗しました。' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'アーカイブの作成に失敗しました。' , __FILE__ , __LINE__ );
 			return	'<p class="error">アーカイブの作成に失敗しました。</p>';
 		}
 
@@ -3163,9 +3163,9 @@ class pxplugin_PicklesCrawler_admin{
 
 		if( $this->px->req()->get_param('ext') == 'tgz' && strlen( $this->pcconf->get_path_command('tar') ) ){
 			#	tarコマンドが使えたら(UNIXのみ)
-			$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/tgz.php' );
+			$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/tgz.php' );
 			if( !$className ){
-				$this->errors->error_log( 'tgzライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'tgzライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return	'<p class="error">tgzライブラリのロードに失敗しました。</p>';
 			}
 			$obj_tgz = new $className( $this->conf , $this->dbh , $this->errors );
@@ -3191,9 +3191,9 @@ class pxplugin_PicklesCrawler_admin{
 
 		}elseif( $this->px->req()->get_param('ext') == 'zip' && class_exists( 'ZipArchive' ) ){
 			#	ZIP関数が有効だったら
-			$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/zip.php' );
+			$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/zip.php' );
 			if( !$className ){
-				$this->errors->error_log( 'zipライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'zipライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return	'<p class="error">zipライブラリのロードに失敗しました。</p>';
 			}
 			$obj_zip = new $className( $this->conf , $this->dbh , $this->errors );
@@ -3434,7 +3434,7 @@ class pxplugin_PicklesCrawler_admin{
 
 }
 
-?><p class="ttr">プログラムの削除処理を完了しました。</p>';
+?>プログラムの削除処理を完了しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" value="戻る" />'."\n";
 		$RTN .= '	'.$this->theme->mk_form_defvalues( ':detail.'.$this->cmd[1] )."\n";

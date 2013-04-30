@@ -1,42 +1,38 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update: 14:26 2011/04/17
-
-#******************************************************************************************************************
-#	各プログラムの基底クラス
+/**
+ * 各プログラムの基底クラス
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update: 14:26 2011/04/17
+ */
 class pxplugin_PicklesCrawler_programbase_execute{
 
-	var $conf;
-	var $errors;
-	var $req;
-	var $dbh;
+	protected $px;
 
-	var $pcconf;
-	var $proj;
-	var $program;
+	protected $pcconf;
+	protected $proj;
+	protected $program;
 
-	var $result = array();	//結果メッセージを記憶する配列
+	protected $result = array();	//結果メッセージを記憶する配列
 
-	var $debug_mode = false;
+	protected $debug_mode = false;
 		#	開発中のデバッグメッセージを出力するか。
 
-	#--------------------------------------
-	#	コンストラクタ
-	function pxplugin_PicklesCrawler_programbase_execute( &$conf , &$pcconf , &$proj , &$program , &$errors , &$dbh , &$req ){
-		$this->conf = &$conf;
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$px , &$pcconf , &$proj , &$program ){
+		$this->px = &$px;
 		$this->pcconf = &$pcconf;
 		$this->proj = &$proj;
 		$this->program = &$program;
-		$this->errors = &$errors;
-		$this->dbh = &$dbh;
-		$this->req = &$req;
 
 		$this->additional_constructor();
 	}
-	#--------------------------------------
-	#	コンストラクタの追加処理
-	function additional_constructor(){
+	/**
+	 * コンストラクタの追加処理
+	 */
+	protected function additional_constructor(){
 		#	必要に応じて拡張してください。
 	}
 
@@ -44,9 +40,10 @@ class pxplugin_PicklesCrawler_programbase_execute{
 
 
 
-	#########################################################################################################################################################
-	#	処理の開始
-	function execute( &$httpaccess , $current_url , $saved_file_path , $options = array() ){
+	/**
+	 * 処理の開始
+	 */
+	public function execute( &$httpaccess , $current_url , $saved_file_path , $options = array() ){
 		/** -------------------------------------- **
 			&$httpaccess
 				HTTPアクセスオブジェクト
@@ -60,9 +57,10 @@ class pxplugin_PicklesCrawler_programbase_execute{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	ロードするURLを新たに追加する処理
-	function add_download_url( $add_url , $option = array() ){
+	/**
+	 * ロードするURLを新たに追加する処理
+	 */
+	public function add_download_url( $add_url , $option = array() ){
 		#	$option['referer']//リファラ値;
 		#	$option['method'];//送信メソッド(GET/POST)
 		#	$option['post'];//POSTメソッドで送る値($option['method']がPOSTじゃない場合は無視される)
@@ -73,15 +71,17 @@ class pxplugin_PicklesCrawler_programbase_execute{
 	}
 
 
-	#--------------------------------------
-	#	エラーをログに残す
-	function error_log( $msg = '' ){
-		return	$this->errors->error_log( $msg );
+	/**
+	 * エラーをログに残す
+	 */
+	public function error_log( $msg = '' ){
+		return	$this->px->error()->error_log( $msg );
 	}
 
-	#--------------------------------------
-	#	実行結果を出力する
-	function msg( $status_cd , $msg = '' , $program = '' , $parameter = '' , $option = array() ){
+	/**
+	 * 実行結果を出力する
+	 */
+	public function msg( $status_cd , $msg = '' , $program = '' , $parameter = '' , $option = array() ){
 		/** --------------------------------------
 		【　ステータスコード　】
 		※PicklesDYプラグイン の API の <progress /> と同じ。
@@ -107,9 +107,10 @@ class pxplugin_PicklesCrawler_programbase_execute{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	実行結果を得る
-	function get_result(){
+	/**
+	 * 実行結果を得る
+	 */
+	public function get_result(){
 		return	$this->result;
 	}
 
@@ -137,10 +138,11 @@ class pxplugin_PicklesCrawler_programbase_execute{
 	#
 	#* ------------------------------------------------------------------------------------------------------------------ *
 
-	#--------------------------------------
-	#	URLをパースして、変換指示を返す
-	#	$method,$post_data : 19:52 2008/04/16 追加
-	function get_replace_url_info( $current_url , $TARGET_PATH_ORIGINAL , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url , $method = 'GET' , $FORM_DATA = null ){
+	/**
+	 * URLをパースして、変換指示を返す
+	 * $method,$post_data : 19:52 2008/04/16 追加
+	 */
+	public function get_replace_url_info( $current_url , $TARGET_PATH_ORIGINAL , $URL_PROTOCOL , $URL_DOMAIN , $current_virtual_url , $method = 'GET' , $FORM_DATA = null ){
 		if( !strlen( $method ) ){
 			$method = 'GET';
 		}
@@ -278,12 +280,13 @@ class pxplugin_PicklesCrawler_programbase_execute{
 		}
 		return	$RTN;
 
-	}
+	}//get_replace_url_info()
 
 
-	#--------------------------------------
-	#	リンク先URLの最適化
-	function optimize_url( $current_url , $TARGET_PATH ){
+	/**
+	 * リンク先URLの最適化
+	 */
+	public function optimize_url( $current_url , $TARGET_PATH ){
 		#	絶対パスと相対パスとを吸収し、
 		#	スラッシュから始まる絶対パスに変換する。
 
@@ -305,12 +308,13 @@ class pxplugin_PicklesCrawler_programbase_execute{
 
 		$RTN = $urlinfo2['path'];
 		return	$RTN;
-	}
+	}//optimize_url()
 
 
-	#--------------------------------------
-	#	現在地点(URL)から、$pathへの相対パスを求める
-	function convert2relativepath( $url , $path ){
+	/**
+	 * 現在地点(URL)から、$pathへの相対パスを求める
+	 */
+	public function convert2relativepath( $url , $path ){
 
 		#	アンカーを考慮
 		if( strpos( $url , '#' ) ){
@@ -398,11 +402,12 @@ class pxplugin_PicklesCrawler_programbase_execute{
 			$RTN .= '#'.$anchor;
 		}
 		return	$RTN;
-	}
+	}//convert2relativepath()
 
-	#--------------------------------------
-	#	現在地点(URL)から、相対的に解釈された$pathへの絶対的URLを求める
-	function convert2url( $url , $path , $params = null ){
+	/**
+	 * 現在地点(URL)から、相対的に解釈された$pathへの絶対的URLを求める
+	 */
+	public function convert2url( $url , $path , $params = null ){
 		#	$params は、PicklesCrawler 0.1.4 で追加されました。
 
 		if( !preg_match( '/^([a-zA-Z]+)\:\/\/(.+?(?:\:[0-9]+)?)(\/.*)/i' , $url , $result ) ){
@@ -438,11 +443,12 @@ class pxplugin_PicklesCrawler_programbase_execute{
 			$RTN .= '?'.implode( '&' , $alive_param_memo );
 		}
 		return	$RTN;
-	}
+	}//convert2url()
 
-	#--------------------------------------
-	#	相対パスを絶対パスに書き換える
-	function convert2realpath( $url , $relativepath ){
+	/**
+	 * 相対パスを絶対パスに書き換える
+	 */
+	public function convert2realpath( $url , $relativepath ){
 		if( preg_match( '/^\//' , $relativepath ) ){
 			#	スラッシュから始まっていたら、
 			#	変換の必要はない。
@@ -486,16 +492,17 @@ class pxplugin_PicklesCrawler_programbase_execute{
 		}
 
 		return	$RTN;
-	}
+	}//convert2realpath()
 
 
 
 	#========================================================================================================================================================
 	#	★base_resources_htmlparser からの移植
 
-	#----------------------------------------------------------------------------
-	#	HTML属性の解析
-	function html_attribute_parse( $strings ){
+	/**
+	 * HTML属性の解析
+	 */
+	public function html_attribute_parse( $strings ){
 		preg_match_all( $this->get_pattern_attribute() , $strings , $results );
 		for( $i = 0; !is_null($results[0][$i]); $i++ ){
 			if( !strlen($results[3][$i]) ){
@@ -508,11 +515,12 @@ class pxplugin_PicklesCrawler_programbase_execute{
 			}
 		}
 		return	$RTN;
-	}
+	}//html_attribute_parse()
 
-	#--------------------------------------
-	#	タグの属性情報を検出するPREGパターンを生成して返す。
-	function get_pattern_attribute(){
+	/**
+	 * タグの属性情報を検出するPREGパターンを生成して返す。
+	 */
+	public function get_pattern_attribute(){
 		#	属性の種類
 		$rnsp = '(?:\r\n|\r|\n| |\t)';
 		$prop = '[a-z0-9A-Z_-]+';
@@ -523,12 +531,13 @@ class pxplugin_PicklesCrawler_programbase_execute{
 		$prop_exists = '/'.$rnsp.'*('.$prop.')(?:\=(?:('.$typeB.')|'.$typeA.'))?'.$rnsp.'*/is';
 
 		return	$prop_exists;
-	}
+	}//get_pattern_attribute()
 
-	#----------------------------------------------------------------------------
-	#	受け取ったHTMLをテキスト形式に変換する
-	#	(クラス base_static_text からのコピー)
-	function html2text(){
+	/**
+	 * 受け取ったHTMLをテキスト形式に変換する
+	 * (クラス base_static_text からのコピー)
+	 */
+	public function html2text(){
 		//	htmlspecialchars_decode()というのもあるが、
 		//	PHP5以降からなので、とりあえず使ってない。
 		list($TEXT) = func_get_args();

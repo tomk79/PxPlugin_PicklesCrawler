@@ -1,22 +1,21 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update : 19:12 2007/06/23
-
-#******************************************************************************************************************
-#	各プログラム情報クラスの基底クラス
+/**
+ * 各プログラム情報クラスの基底クラス
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update : 19:12 2007/06/23
+ */
 class pxplugin_PicklesCrawler_programbase_info{
 
-	var $program_type_name = 'No Titled';
+	protected $program_type_name = 'No Titled';// プログラムタイプ名称
 
-	function get_program_type_name(){
+	/**
+	 * プログラムタイプの名称を取得する
+	 */
+	public function get_program_type_name(){
 		return	$this->program_type_name;
 	}
 
 }
-
-
-
-
 
 ?>

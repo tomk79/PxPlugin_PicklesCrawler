@@ -193,7 +193,7 @@ class pxplugin_PicklesCrawler_config{
 	public function &factory_crawlctrl($cmd){
 		$className = $this->px->load_px_plugin_class( '/PicklesCrawler/crawlctrl.php' );
 		if( !$className ){
-			$this->errors->error_log( 'PicklesCrawlerプラグイン「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'PicklesCrawlerプラグイン「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
 			return	false;
 		}
 		$obj = new $className( $this->px, $this, $cmd );
@@ -202,7 +202,7 @@ class pxplugin_PicklesCrawler_config{
 
 }
 
-?>イン「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
+?>�「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
 			return	false;
 		}
 		$obj = new $className( &$this );

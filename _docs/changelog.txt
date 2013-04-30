@@ -1,5 +1,8 @@
 
 
+[-- PicklesCrawler 1.0.0b1 (****/**/**) --]
+・Pickles Framework 1.x 系に移植。
+
 [-- PicklesCrawler 0.4.3 (2011/08/28) --]
 ・PicklesFrameworkの拡張HTTPレスポンスヘッダー X-PXFW-RELATEDLINK に対応した。
 ・プロジェクトにHTML内のJavaScriptを解析するフラグを追加。デフォルトでは解析しないようになった。
