@@ -1104,9 +1104,10 @@ class pxplugin_PicklesCrawler_admin{
 
 		return $this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	新規プロジェクト作成/編集：完了
-	function page_edit_proj_thanks(){
+	/**
+	 * 新規プロジェクト作成/編集：完了
+	 */
+	private function page_edit_proj_thanks(){
 		$RTN = ''."\n";
 		if( $this->cmd[0] == 'edit_proj' ){
 			$RTN .= '<p>プロジェクト編集処理を完了しました。</p>'."\n";
@@ -1124,8 +1125,11 @@ class pxplugin_PicklesCrawler_admin{
 
 
 	###################################################################################################################
-	#	プロジェクトをエクスポート
-	function start_export(){
+
+	/**
+	 * プロジェクトをエクスポート
+	 */
+	private function start_export(){
 		$error = $this->check_export_check();
 		if( $this->px->req()->get_param('mode') == 'thanks' ){
 			return	$this->page_export_thanks();
@@ -1147,9 +1151,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$this->page_export_input( $error );
 	}
-	#--------------------------------------
-	#	プロジェクトをエクスポート：入力
-	function page_export_input( $error ){
+	/**
+	 * プロジェクトをエクスポート：入力
+	 */
+	private function page_export_input( $error ){
 		$project_model = &$this->pcconf->factory_model_project();
 		$RTN = '';
 
@@ -1157,15 +1162,15 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '	必要事項を入力して、「確認する」ボタンをクリックしてください。<br />'."\n";
 		$RTN .= '</p>'."\n";
 		$RTN .= '<p>'."\n";
-		$RTN .= '	<span class="must">*必須</span> が付いている項目は必ず入力してください。<br />'."\n";
+		$RTN .= '	 <span class="form_elements-must">必須</span> が付いている項目は必ず入力してください。<br />'."\n";
 		$RTN .= '</p>'."\n";
 
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post">'."\n";
 		$RTN .= '<table style="width:100%;" class="form_elements">'."\n";
 		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th width="30%"><div>対象プロジェクト<span class="must">*必須</span></div></th>'."\n";
-		$RTN .= '		<td width="70%">'."\n";
-		$RTN .= '			<ul>'."\n";
+		$RTN .= '		<th style="width:30%;"><div>対象プロジェクト <span class="form_elements-must">必須</span></div></th>'."\n";
+		$RTN .= '		<td style="width:70%;">'."\n";
+		$RTN .= '			<ul class="form_elements-list">'."\n";
 		$project_list = $project_model->get_project_list();
 		foreach( $project_list as $Line ){
 			$in_project = $this->px->req()->get_param('project');
@@ -1179,8 +1184,8 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th width="30%"><div>圧縮形式<span class="must">*必須</span></div></th>'."\n";
-		$RTN .= '		<td width="70%">'."\n";
+		$RTN .= '		<th style="width:30%;"><div>圧縮形式 <span class="form_elements-must">必須</span></div></th>'."\n";
+		$RTN .= '		<td style="width:70%;">'."\n";
 		$is_zip = array();
 		if( class_exists( 'ZipArchive' ) ){
 			$is_zip['zip'] = true;
@@ -1189,7 +1194,7 @@ class pxplugin_PicklesCrawler_admin{
 			$is_zip['tgz'] = true;
 		}
 		if( count( $is_zip ) ){
-			$RTN .= '<ul class="none mt0 mb0">'."\n";
+			$RTN .= '<ul class="form_elements-list">'."\n";
 			$c = array( $this->px->req()->get_param('ziptype').''=>' checked="checked"' );
 			foreach( array_keys( $is_zip ) as $type ){
 				$RTN .= '	<li><label><input type="radio" name="ziptype" value="'.htmlspecialchars( strtolower($type) ).'"'.$c[$type].' /> '.strtoupper($type).'形式</label></li>'."\n";
@@ -1209,18 +1214,18 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</table>'."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="確認する" /></p>'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="confirm" />'."\n";
-		$RTN .= '	'.''."\n";
 		$RTN .= '</form>'."\n";
 		$RTN .= '<hr />'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->href( $this->site->get_parent( $this->req->p() ) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
 		// $RTN .= '	'.$this->mk_form_defvalues( $this->site->get_parent( $this->req->p() ) )."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="キャンセル" /></p>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトをエクスポート：確認
-	function page_export_confirm(){
+	/**
+	 * プロジェクトをエクスポート：確認
+	 */
+	private function page_export_confirm(){
 		$project_model = &$this->pcconf->factory_model_project();
 
 		$RTN = '';
@@ -1235,9 +1240,9 @@ class pxplugin_PicklesCrawler_admin{
 
 		$RTN .= '<table style="width:100%;" class="form_elements">'."\n";
 		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th width="30%"><div>対象プロジェクト</div></th>'."\n";
-		$RTN .= '		<td width="70%">'."\n";
-		$RTN .= '			<ul>'."\n";
+		$RTN .= '		<th style="width:30%;"><div>対象プロジェクト</div></th>'."\n";
+		$RTN .= '		<td style="width:70%;">'."\n";
+		$RTN .= '			<ul class="form_elements-list">'."\n";
 		$project_list = $project_model->get_project_list();
 		foreach( $project_list as $Line ){
 			$in_project = $this->px->req()->get_param('project');
@@ -1249,15 +1254,15 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th width="30%"><div>圧縮形式</div></th>'."\n";
-		$RTN .= '		<td width="70%">'."\n";
+		$RTN .= '		<th style="width:30%;"><div>圧縮形式</div></th>'."\n";
+		$RTN .= '		<td style="width:70%;">'."\n";
 		$RTN .= '			<div>'.htmlspecialchars( strtoupper( $this->px->req()->get_param('ziptype') ) ).' 形式</div>'."\n";
 		$HIDDEN .= '<input type="hidden" name="ziptype" value="'.htmlspecialchars( $this->px->req()->get_param('ziptype') ).'" />';
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
-		$RTN .= '<div class="AlignC">'."\n";
+		$RTN .= '<div class="unit center">'."\n";
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
@@ -1272,15 +1277,16 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		$RTN .= '</div>'."\n";
 		$RTN .= '<hr />'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->href( $this->site->get_parent( $this->req->p() ) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
 		// $RTN .= '	'.$this->mk_form_defvalues( $this->site->get_parent( $this->req->p() ) )."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="キャンセル" /></p>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトをエクスポート：チェック
-	function check_export_check(){
+	/**
+	 * プロジェクトをエクスポート：チェック
+	 */
+	private function check_export_check(){
 		$RTN = array();
 		if( !count( $this->px->req()->get_param('project') ) ){
 			$RTN['project'] = '対象プロジェクトを選択してください。';
@@ -1303,41 +1309,45 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトをエクスポート：実行
-	function execute_export_execute(){
+	/**
+	 * プロジェクトをエクスポート：実行
+	 */
+	private function execute_export_execute(){
 		// if( !$this->user->save_t_lastaction() ){
 		// 	#	2重書き込み防止
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
 		// }
 
 		$className = $this->px->load_px_plugin_class('/PicklesCrawler/resources/io.php');
-		if( !$className ){ return $this->theme->errorend('I/Oモジュールをロードできません。',__FILE__,__LINE__); }
-		$io = new $className( $this->pcconf );
+		if( !$className ){
+			return '<p class="error">I/Oモジュールをロードできません。</p>';
+		}
+		$io = new $className( $this->px, $this->pcconf );
 
-		if( !$this->dbh->lock() ){
-			return $theme->errorend('アプリケーションがロックされています。しばらく時間をおいてから、もう一度操作してみてください。');
+		if( !$this->px->dbh()->lock() ){
+			return	'<p class="error">アプリケーションがロックされています。しばらく時間をおいてから、もう一度操作してみてください。</p>';
 		}
 
 		$path_export_archive = $io->mk_export_file( $this->px->req()->get_param('ziptype') , array( 'project'=>$this->px->req()->get_param('project') ) );
 		if( $path_export_archive === false ){
-			$this->dbh->unlock();
+			$this->px->dbh()->unlock();
 			$this->px->error()->error_log( 'アーカイブの作成に失敗しました。' , __FILE__ , __LINE__ );
 			return	'<p class="error">アーカイブの作成に失敗しました。</p>';
 		}
 
-		$this->dbh->unlock();
+		$this->px->dbh()->unlock();
 
-		$result = $this->theme->flush_file( $path_export_archive , array( 'filename'=>basename($path_export_archive) , 'delete'=>true ) );
+		$result = $this->px->flush_file( $path_export_archive , array( 'filename'=>basename($path_export_archive) , 'delete'=>true ) );
 
 		return	$this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	プロジェクトをエクスポート：完了
-	function page_export_thanks(){
+	/**
+	 * プロジェクトをエクスポート：完了
+	 */
+	private function page_export_thanks(){
 		$RTN = '';
 		$RTN .= '<p>プロジェクトをエクスポート処理を完了しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->href( $this->site->get_parent( $this->req->p() ) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
 		$RTN .= '	<p><input type="submit" value="戻る" /></p>'."\n";
 		// $RTN .= '	'.$this->mk_form_defvalues( $this->site->get_parent( $this->req->p() ) )."\n";
 		$RTN .= '</form>'."\n";
@@ -1891,7 +1901,7 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '		<th style="width:30%;">'."\n";
 			$RTN .= '			<div>物理名</div>'."\n";
 			$RTN .= '		</th>'."\n";
-			$RTN .= '		<th width="70%">'."\n";
+			$RTN .= '		<th style="width:70%;">'."\n";
 			$RTN .= '			<div>論理名/送信設定</div>'."\n";
 			$RTN .= '		</th>'."\n";
 			$RTN .= '	</tr>'."\n";
@@ -1922,7 +1932,7 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		<th style="width:30%;">'."\n";
 		$RTN .= '			<div>物理名</div>'."\n";
 		$RTN .= '		</th>'."\n";
-		$RTN .= '		<th width="70%">'."\n";
+		$RTN .= '		<th style="width:70%;">'."\n";
 		$RTN .= '			<div>論理名/送信設定</div>'."\n";
 		$RTN .= '		</th>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1960,7 +1970,7 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '		<th style="width:30%;">'."\n";
 			$RTN .= '			<div>物理名</div>'."\n";
 			$RTN .= '		</th>'."\n";
-			$RTN .= '		<th width="70%">'."\n";
+			$RTN .= '		<th style="width:70%;">'."\n";
 			$RTN .= '			<div>論理名/送信設定</div>'."\n";
 			$RTN .= '		</th>'."\n";
 			$RTN .= '	</tr>'."\n";
@@ -3168,7 +3178,7 @@ class pxplugin_PicklesCrawler_admin{
 				$this->px->error()->error_log( 'tgzライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return	'<p class="error">tgzライブラリのロードに失敗しました。</p>';
 			}
-			$obj_tgz = new $className( $this->conf , $this->dbh , $this->errors );
+			$obj_tgz = new $className( $this->px , $this->pcconf->get_path_command('tar') );
 
 			if( !$obj_tgz->zip( $download_content_path , $download_zipto_path.'.tgz' ) ){
 				return	'<p class="error">圧縮に失敗しました。</p>';
@@ -3179,13 +3189,13 @@ class pxplugin_PicklesCrawler_admin{
 			}
 
 			$dl_filename = $this->cmd[1].'_'.$this->cmd[2].'.tgz';
-			if( $this->pcconf->conf_dl_datetime_in_filename ){
-				$CONTENT = $this->dbh->file_get_contents( $download_content_path.'/__LOGS__/datetime.txt' );
+			if( $this->pcconf->get_value('dl_datetime_in_filename') ){
+				$CONTENT = $this->px->dbh()->file_get_contents( $download_content_path.'/__LOGS__/datetime.txt' );
 				list( $start_datetime , $end_datetime ) = explode(' --- ',$CONTENT);
 				if( !strlen( $end_datetime ) ){
 					$end_datetime = date('Y-m-d H:i:s');
 				}
-				$dl_filename = $this->cmd[1].'_'.date('Ymd_Hi',time::datetime2int($end_datetime)).'_'.$this->cmd[2].'.tgz';
+				$dl_filename = $this->cmd[1].'_'.date('Ymd_Hi',$this->px->dbh()->datetime2int($end_datetime)).'_'.$this->cmd[2].'.tgz';
 			}
 			$download_zipto_path = $download_zipto_path.'.tgz';
 
@@ -3196,8 +3206,7 @@ class pxplugin_PicklesCrawler_admin{
 				$this->px->error()->error_log( 'zipライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return	'<p class="error">zipライブラリのロードに失敗しました。</p>';
 			}
-			$obj_zip = new $className( $this->conf , $this->dbh , $this->errors );
-
+			$obj_zip = new $className( $this->px );
 			if( !$obj_zip->zip( $download_content_path , $download_zipto_path.'.zip' ) ){
 				return	'<p class="error">圧縮に失敗しました。</p>';
 			}
@@ -3207,19 +3216,19 @@ class pxplugin_PicklesCrawler_admin{
 			}
 
 			$dl_filename = $this->cmd[1].'_'.$this->cmd[2].'.zip';
-			if( $this->pcconf->conf_dl_datetime_in_filename ){
-				$CONTENT = $this->dbh->file_get_contents( $download_content_path.'/__LOGS__/datetime.txt' );
+			if( $this->pcconf->get_value('dl_datetime_in_filename') ){
+				$CONTENT = $this->px->dbh()->file_get_contents( $download_content_path.'/__LOGS__/datetime.txt' );
 				list( $start_datetime , $end_datetime ) = explode(' --- ',$CONTENT);
 				if( !strlen( $end_datetime ) ){
 					$end_datetime = date('Y-m-d H:i:s');
 				}
-				$dl_filename = $this->cmd[1].'_'.date('Ymd_Hi',time::datetime2int($end_datetime)).'_'.$this->cmd[2].'.zip';
+				$dl_filename = $this->cmd[1].'_'.date('Ymd_Hi',$this->px->dbh()->datetime2int($end_datetime)).'_'.$this->cmd[2].'.zip';
 			}
 			$download_zipto_path = $download_zipto_path.'.zip';
 
 		}
 
-		$result = $this->theme->flush_file( $download_zipto_path , array( 'filename'=>$dl_filename , 'delete'=>true ) );
+		$result = $this->px->flush_file( $download_zipto_path , array( 'filename'=>$dl_filename , 'delete'=>true ) );
 		if( $result === false ){
 			return	'<p class="error">作成されたアーカイブのダウンロードに失敗しました。</p>';
 		}
@@ -3429,6 +3438,12 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
 		$RTN .= '</form>'."\n";
+		return	$RTN;
+	}
+
+}
+
+?>m>'."\n";
 		return	$RTN;
 	}
 

@@ -1,29 +1,27 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update : 0:52 2010/08/25
-
-#******************************************************************************************************************
-#	インポート・エクスポート
+/**
+ * インポート・エクスポート
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update : 0:52 2010/08/25
+ */
 class pxplugin_PicklesCrawler_resources_io{
 
-	var $pcconf;
-	var $conf;
-	var $dbh;
-	var $errors;
+	private $px;
+	private $pcconf;
 
-	#----------------------------------------------------------------------------
-	#	コンストラクタ
-	function pxplugin_PicklesCrawler_resources_io( &$pcconf ){
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$px, &$pcconf ){
+		$this->px = &$px;
 		$this->pcconf = &$pcconf;
-		$this->conf = &$pcconf->get_basicobj_conf();
-		$this->errors = &$pcconf->get_basicobj_errors();
-		$this->dbh = &$pcconf->get_basicobj_dbh();
 	}
 
-	#----------------------------------------------------------------------------
-	#	エクスポートファイルを作成する
-	function mk_export_file( $ziptype , $options = array() ){
+	/**
+	 * エクスポートファイルを作成する
+	 */
+	public function mk_export_file( $ziptype , $options = array() ){
 
 		#	エクスポートを実行
 		if( !$this->local_export( $options ) ){
@@ -38,14 +36,14 @@ class pxplugin_PicklesCrawler_resources_io{
 			return false;//←圧縮対象が存在しません。
 		}
 
-		if( strtolower($ziptype) == 'tgz' && strlen( $this->conf->path_commands['tar'] ) ){
+		if( strtolower($ziptype) == 'tgz' && strlen( $this->pcconf->get_path_command('tar') ) ){
 			#	tarコマンドが使えたら(UNIXのみ)
-			$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/tgz.php' );
+			$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/tgz.php' );
 			if( !$className ){
-				$this->errors->error_log( 'tgzライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'tgzライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return false;
 			}
-			$obj_tgz = new $className( &$this->conf , &$this->dbh , &$this->errors );
+			$obj_tgz = new $className( $this->px, $this->pcconf->get_path_command('tar') );
 
 			if( !$obj_tgz->zip( $download_content_path , $download_zipto_path.'.tgz' ) ){
 				return false;//圧縮に失敗しました。
@@ -59,12 +57,12 @@ class pxplugin_PicklesCrawler_resources_io{
 
 		}elseif( strtolower($ziptype) == 'zip' && class_exists( 'ZipArchive' ) ){
 			#	ZIP関数が有効だったら
-			$className = $this->dbh->require_lib( '/plugins/PicklesCrawler/resources/zip.php' );
+			$className = $this->px->load_px_plugin_class( '/PicklesCrawler/resources/zip.php' );
 			if( !$className ){
-				$this->errors->error_log( 'zipライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'zipライブラリのロードに失敗しました。' , __FILE__ , __LINE__ );
 				return false;
 			}
-			$obj_zip = new $className( &$this->conf , &$this->dbh , &$this->errors );
+			$obj_zip = new $className( $this->px );
 
 			if( !$obj_zip->zip( $download_content_path , $download_zipto_path.'.zip' ) ){
 				return false;//圧縮に失敗しました。
@@ -81,24 +79,26 @@ class pxplugin_PicklesCrawler_resources_io{
 		if( is_file( $download_zipto_path ) ){
 			return $download_zipto_path;
 		}
+
 		return false;
 	}// mk_export_file()
 
-	#--------------------------------------
-	#	エクスポートデータを作成
-	function local_export( $options = array() ){
+	/**
+	 * エクスポートデータを作成
+	 */
+	private function local_export( $options = array() ){
 		$path_export_dir = $this->pcconf->get_home_dir().'/_export/';
 
-		$this->dbh->rmdir( $path_export_dir );
-		$this->dbh->mkdirall( $path_export_dir );
-		$this->dbh->mkdirall( $path_export_dir.'tmp/' );
+		$this->px->dbh()->rmdir_all( $path_export_dir );
+		$this->px->dbh()->mkdir_all( $path_export_dir );
+		$this->px->dbh()->mkdir_all( $path_export_dir.'tmp/' );
 
-		$projList = $this->dbh->getfilelist( $this->pcconf->get_home_dir().'/proj/' );
+		$projList = $this->px->dbh()->ls( $this->pcconf->get_home_dir().'/proj/' );
 		foreach( $projList as $project_id ){
 			if( @count( $options['project'] ) && !$options['project'][$project_id] ){
 				continue;
 			}
-			$this->dbh->mkdirall( $path_export_dir.'tmp/'.$project_id.'/' );
+			$this->px->dbh()->mkdir_all( $path_export_dir.'tmp/'.$project_id.'/' );
 			$this->local_export_project(
 				$this->pcconf->get_home_dir().'/proj/'.$project_id.'/' ,
 				$path_export_dir.'tmp/'.$project_id.'/'
@@ -108,18 +108,19 @@ class pxplugin_PicklesCrawler_resources_io{
 		return true;
 	}//local_export()
 
-	#--------------------------------------
-	#	プロジェクトをエクスポートフォルダにコピーする
-	function local_export_project( $from , $to ){
-		$projFileList = $this->dbh->getfilelist( $from );
+	/**
+	 * プロジェクトをエクスポートフォルダにコピーする
+	 */
+	private function local_export_project( $from , $to ){
+		$projFileList = $this->px->dbh()->ls( $from );
 		foreach( $projFileList as $project_filename ){
 			$tmp_path = $from.$project_filename;
 			if( is_dir( $tmp_path ) ){
-				$this->dbh->mkdirall( $to.$project_filename.'/' );
+				$this->px->dbh()->mkdir_all( $to.$project_filename.'/' );
 				if( $project_filename == 'prg' ){
-					$projPrgList = $this->dbh->getfilelist( $from.$project_filename.'/' );
+					$projPrgList = $this->px->dbh()->ls( $from.$project_filename.'/' );
 					foreach( $projPrgList as $program_id ){
-						$this->dbh->mkdirall( $to.$project_filename.'/'.$program_id.'/' );
+						$this->px->dbh()->mkdir_all( $to.$project_filename.'/'.$program_id.'/' );
 						$result = $this->local_export_program(
 							$from.$project_filename.'/'.$program_id.'/' ,
 							$to.$project_filename.'/'.$program_id.'/'
@@ -127,7 +128,7 @@ class pxplugin_PicklesCrawler_resources_io{
 					}
 				}
 			}elseif( is_file( $tmp_path ) ){
-				$this->dbh->copy(
+				$this->px->dbh()->copy(
 					$tmp_path ,
 					$to.$project_filename
 				);
@@ -136,20 +137,21 @@ class pxplugin_PicklesCrawler_resources_io{
 		return true;
 	}// local_export_project()
 
-	#--------------------------------------
-	#	プログラムをエクスポートフォルダにコピーする
-	function local_export_program( $from , $to ){
+	/**
+	 * プログラムをエクスポートフォルダにコピーする
+	 */
+	private function local_export_program( $from , $to ){
 		if( !is_dir( $from ) ){ return false; }
-		$from = $this->dbh->get_realpath( $from ).'/';
+		$from = $this->px->dbh()->get_realpath( $from ).'/';
 		if( !is_dir( $to ) ){ return false; }
-		$to = $this->dbh->get_realpath( $to ).'/';
+		$to = $this->px->dbh()->get_realpath( $to ).'/';
 
-		$prgFileList = $this->dbh->getfilelist( $from );
+		$prgFileList = $this->px->dbh()->ls( $from );
 		foreach( $prgFileList as $prgFile ){
 			if( is_dir( $from.$prgFile ) ){
-				$this->dbh->mkdir($to.$prgFile);
+				$this->px->dbh()->mkdir($to.$prgFile);
 			}elseif( is_file( $from.$prgFile ) ){
-				$this->dbh->copy(
+				$this->px->dbh()->copy(
 					$from.$prgFile ,
 					$to.$prgFile
 				);
@@ -160,4 +162,5 @@ class pxplugin_PicklesCrawler_resources_io{
 	}// local_export_program()
 
 }
+
 ?>
