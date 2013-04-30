@@ -41,7 +41,7 @@ class pxplugin_PicklesCrawler_register_pxcommand extends px_bases_pxcommand{
 		# RAMデータディレクトリ内に専用の領域を付与している。
 		if( !$pcconf->set_home_dir( $this->px->get_conf('paths.px_dir').'_sys/ramdata/plugins/PicklesCrawler' ) ){
 			$src = '';
-			$src .= '<p>'.t::h($this->px->get_conf('paths.px_dir').'_sys/ramdata/plugins/PicklesCrawler').' の作成に失敗しました。</p>'."\n";
+			$src .= '<p class="error">ホームディレクトリ 「'.t::h($this->px->get_conf('paths.px_dir').'_sys/ramdata/plugins/PicklesCrawler').'」 を設定できませんでした。</p>'."\n";
 			print $this->html_template($src);
 			exit;
 		}

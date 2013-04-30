@@ -127,7 +127,7 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		if( is_file( $path_project_dir.'/url_outofsite.txt' ) ){
 			#	PxCrawler 0.3.7 追加
-			foreach( $this->dbh->file_get_lines( $path_project_dir.'/url_outofsite.txt' ) as $url ){
+			foreach( $this->px->dbh()->file_get_lines( $path_project_dir.'/url_outofsite.txt' ) as $url ){
 				$url = trim( $url );
 				if( !strlen( $url ) ){ continue; }
 				$this->put_urllist_outofsite( $url );
@@ -144,7 +144,7 @@ class pxplugin_PicklesCrawler_model_project{
 		}
 		if( is_file( $path_project_dir.'/url_startpages.txt' ) ){
 			#	PxCrawler 0.3.7 追加
-			foreach( $this->dbh->file_get_lines( $path_project_dir.'/url_startpages.txt' ) as $url ){
+			foreach( $this->px->dbh()->file_get_lines( $path_project_dir.'/url_startpages.txt' ) as $url ){
 				$url = trim( $url );
 				if( !strlen( $url ) ){ continue; }
 				$this->put_urllist_startpages( $url );
@@ -410,8 +410,7 @@ class pxplugin_PicklesCrawler_model_project{
 		if( !is_dir( $path_project_dir ) ){
 			return false;
 		}
-
-		$result = $this->px->dbh()->rmdir( $path_project_dir );
+		$result = $this->px->dbh()->rmdir_all( $path_project_dir );
 		if( !$result ){
 			return	false;
 		}
@@ -915,7 +914,7 @@ class pxplugin_PicklesCrawler_model_project{
 	 * iniファイルを読み込んで、配列にして返す。
 	 */
 	public function load_ini( $path_ini ){
-		if( !$this->dbh->is_readable( $path_ini ) ){
+		if( !$this->px->dbh()->is_readable( $path_ini ) ){
 			return	false;
 		}
 		$ini_lines = $this->px->dbh()->file_get_lines( $path_ini );
