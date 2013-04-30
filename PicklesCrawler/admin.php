@@ -13,6 +13,7 @@ class pxplugin_PicklesCrawler_admin{
 	private $cmd;
 
 	private $local_sitemap = array();// ページ名等を定義する
+	private $title = null; // 出力するページタイトル文字列
 
 	/**
 	 * コンストラクタ
@@ -39,6 +40,12 @@ class pxplugin_PicklesCrawler_admin{
 		return	$this->pcconf->set_value( $key , $val );
 	}
 
+	/**
+	 * ページタイトルを取得する
+	 */
+	public function get_page_title(){
+		return $this->title;
+	}
 
 	/**
 	 * 処理の開始
@@ -47,10 +54,11 @@ class pxplugin_PicklesCrawler_admin{
 		$cont_src = $this->start_controller();
 
 		$title = $this->local_sitemap[':'.implode('.', $this->cmd)]['title'];
-		$rtn = '';
 		if( strlen( $title ) ){
-			$rtn .= '<p style="font-size:x-large; font-weight:bold;">'.htmlspecialchars($title).'</p>'."\n";
+			$this->title = $title;
 		}
+
+		$rtn = '';
 		$rtn .= $cont_src."\n";
 		return $rtn;
 	}
@@ -222,12 +230,15 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '</div><!-- /.unit -->'."\n";
 		}
 
-		$RTN .= '<hr />'."\n";
+
+		$RTN .= '<div class="more_links">'."\n";
 		$RTN .= '<ul>'."\n";
 		$RTN .= '	<li>'.$this->mk_link(':create_proj',array('style'=>'inside')).'</li>'."\n";
 		$RTN .= '	<li>'.$this->mk_link(':export',array('style'=>'inside')).'</li>'."\n";
 		$RTN .= '	<li>'.$this->mk_link(':configcheck',array('style'=>'inside')).'</li>'."\n";
 		$RTN .= '</ul>'."\n";
+		$RTN .= '</div><!-- /.more_links -->'."\n";
+
 		return	$RTN;
 	}
 
@@ -510,10 +521,14 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 
 
-		$RTN .= '<hr />'."\n";
-		$RTN .= '<ul>'."\n";
-		$RTN .= '	<li>'.$this->mk_link(':delete_proj.'.$this->cmd[1],array('label'=>'このプロジェクトを削除','style'=>'inside')).'</li>'."\n";
-		$RTN .= '</ul>'."\n";
+		$RTN .= '<div class="more_links">'."\n";
+		$RTN .= '	<ul>'."\n";
+		$RTN .= '		<li>'.$this->mk_link(':delete_proj.'.$this->cmd[1],array('label'=>'このプロジェクトを削除','style'=>'inside')).'</li>'."\n";
+		$RTN .= '		<li><a href="'.t::h($this->href(':')).'">戻る</a></li>'."\n";
+		$RTN .= '	</ul>'."\n";
+		$RTN .= '</div><!-- /.more_links -->'."\n";
+		$RTN .= ''."\n";
+
 
 		return	$RTN;
 	}
@@ -3419,20 +3434,7 @@ class pxplugin_PicklesCrawler_admin{
 
 }
 
-?>'."\n";
-		$RTN .= '</div>'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
-		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
-		$RTN .= '</form>'."\n";
-		return	$RTN;
-	}
-
-}
-
-?>��削除：完了
-	function page_delete_program_thanks(){
-		$RTN = ''."\n";
-		$RTN .= '<p class="ttr">プログラムの削除処理を完了しました。</p>';
+?><p class="ttr">プログラムの削除処理を完了しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" value="戻る" />'."\n";
 		$RTN .= '	'.$this->theme->mk_form_defvalues( ':detail.'.$this->cmd[1] )."\n";

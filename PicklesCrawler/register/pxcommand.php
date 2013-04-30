@@ -66,6 +66,8 @@ class pxplugin_PicklesCrawler_register_pxcommand extends px_bases_pxcommand{
 		$src = '';
 		$src .= $obj->start();
 
+		$this->set_title( $obj->get_page_title() );//タイトルをセットする
+
 		print $this->html_template($src);
 		exit;
 	}
