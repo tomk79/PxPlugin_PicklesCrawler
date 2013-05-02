@@ -1,10 +1,9 @@
 <?php
 
-#	Copyright (C)Tomoya Koyanagi.
-#	Last Update: 12:54 2011/08/28
-
 /**
  * プロジェクト管理機能
+ * Copyright (C)Tomoya Koyanagi.
+ * Last Update: 12:54 2011/08/28
  */
 class pxplugin_PicklesCrawler_admin{
 
@@ -1808,10 +1807,13 @@ class pxplugin_PicklesCrawler_admin{
 
 
 	###################################################################################################################
-	#	プロジェクトのパラメータ定義を編集
-	function start_edit_param_define(){
 
-		$in = $this->px->req()->get_param();
+	/**
+	 * プロジェクトのパラメータ定義を編集
+	 */
+	private function start_edit_param_define(){
+
+		$in = $this->px->req()->get_all_params();
 
 		$param_list = array();
 		foreach( $in as $key=>$val ){
@@ -1872,7 +1874,7 @@ class pxplugin_PicklesCrawler_admin{
 				}
 			}
 
-			$in = $this->px->req()->get_param();
+			$in = $this->px->req()->get_all_params();
 
 			$param_list = array();
 			foreach( $in as $key=>$val ){
@@ -1887,9 +1889,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$this->page_edit_param_define_input( $error , $param_list );
 	}
-	#--------------------------------------
-	#	プロジェクトのパラメータ定義を編集：入力
-	function page_edit_param_define_input( $error , $param_list ){
+	/**
+	 * プロジェクトのパラメータ定義を編集：入力
+	 */
+	private function page_edit_param_define_input( $error , $param_list ){
 
 		$RTN = ''."\n";
 		$HIDDEN = ''."\n";
@@ -1947,7 +1950,7 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</table>'."\n";
 
 		$RTN .= '	<p>これでいい場合は「確認する」を、さらに追加する場合は「画面を更新」をクリックしてください。</p>'."\n";
-		$RTN .= '	<div class="AlignC">'."\n";
+		$RTN .= '	<div class="center">'."\n";
 		$RTN .= '		<input type="submit" value="確認する" />'."\n";
 		$RTN .= '		<input type="submit" value="画面を更新" onclick="document.getElementById(\'pc_document_form_mode\').value=\'input\'; return true;" />'."\n";
 		$RTN .= '	</div>'."\n";
@@ -1956,9 +1959,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトのパラメータ定義を編集：確認
-	function page_edit_param_define_confirm( $param_list ){
+	/**
+	 * プロジェクトのパラメータ定義を編集：確認
+	 */
+	private function page_edit_param_define_confirm( $param_list ){
 
 		$RTN = ''."\n";
 		$HIDDEN = ''."\n";
@@ -1998,7 +2002,7 @@ class pxplugin_PicklesCrawler_admin{
 
 		$RTN .= '<p>この設定でよろしければ、「保存する」をクリックしてください。</p>'."\n";
 
-		$RTN .= '<div class="AlignC p">'."\n";
+		$RTN .= '<div class="unit center">'."\n";
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
@@ -2019,15 +2023,17 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトのパラメータ定義を編集：チェック
-	function check_edit_param_define_check( $param_list ){
+	/**
+	 * プロジェクトのパラメータ定義を編集：チェック
+	 */
+	private function check_edit_param_define_check( $param_list ){
 		$RTN = array();
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	プロジェクトのパラメータ定義を編集：実行
-	function execute_edit_param_define_execute( $param_list ){
+	/**
+	 * プロジェクトのパラメータ定義を編集：実行
+	 */
+	private function execute_edit_param_define_execute( $param_list ){
 		// if( !$this->user->save_t_lastaction() ){
 		// 	#	2重書き込み防止
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
@@ -2049,9 +2055,10 @@ class pxplugin_PicklesCrawler_admin{
 
 		return	$this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	プロジェクトのパラメータ定義を編集：完了
-	function page_edit_param_define_thanks(){
+	/**
+	 * プロジェクトのパラメータ定義を編集：完了
+	 */
+	private function page_edit_param_define_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>プロジェクトのパラメータ定義を編集処理を完了しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->href( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
@@ -2260,7 +2267,7 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</div>'."\n";
 
 		$RTN .= '	<p>これでいい場合は「確認する」を、さらに追加する場合は「画面を更新」をクリックしてください。</p>'."\n";
-		$RTN .= '	<div class="AlignC">'."\n";
+		$RTN .= '	<div class="center">'."\n";
 		$RTN .= '		<input type="submit" value="確認する" />'."\n";
 		$RTN .= '		<input type="submit" value="画面を更新" onclick="document.getElementById(\'cont_op_document_form\').mode.value=\'input\';return true;" />'."\n";
 		$RTN .= '	</div>'."\n";
@@ -2830,7 +2837,7 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</table>'."\n";
 
 		$RTN .= '	<p>これでいい場合は「確認する」を、さらに追加する場合は「画面を更新」をクリックしてください。</p>'."\n";
-		$RTN .= '	<div class="AlignC">'."\n";
+		$RTN .= '	<div class="center">'."\n";
 		$RTN .= '		<input type="submit" value="確認する" />'."\n";
 		$RTN .= '		<input type="submit" value="画面を更新" onclick="document.getElementById(\'cont_op_document_form\').mode.value=\'input\';return true;" />'."\n";
 		$RTN .= '	</div>'."\n";
@@ -2893,7 +2900,7 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '</table>'."\n";
 		}
 
-		$RTN .= '<div class="AlignC">'."\n";
+		$RTN .= '<div class="center">'."\n";
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
@@ -3437,6 +3444,13 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</div>'."\n";
 		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
+		$RTN .= '</form>'."\n";
+		return	$RTN;
+	}
+
+}
+
+?>ue="戻る" /></p>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
