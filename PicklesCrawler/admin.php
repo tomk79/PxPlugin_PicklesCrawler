@@ -2071,8 +2071,12 @@ class pxplugin_PicklesCrawler_admin{
 
 
 	###################################################################################################################
-	#	保存ファイル名のリライトルール編集
-	function start_edit_localfilename_rewriterules(){
+
+
+	/**
+	 * 保存ファイル名のリライトルール編集
+	 */
+	private function start_edit_localfilename_rewriterules(){
 		if( strlen( $this->px->req()->get_param('add:before') ) ){
 			for( $i = 1; strlen( $this->px->req()->get_param('p'.$i.':after') ); $i ++ ){;}
 			$this->px->req()->set_param( 'p'.$i.':priority' , $i );
@@ -2106,9 +2110,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$this->page_edit_localfilename_rewriterules_input( $error );
 	}
-	#--------------------------------------
-	#	保存ファイル名のリライトルール編集：入力
-	function page_edit_localfilename_rewriterules_input( $error ){
+	/**
+	 * 保存ファイル名のリライトルール編集：入力
+	 */
+	private function page_edit_localfilename_rewriterules_input( $error ){
 		$RTN = ''."\n";
 
 		$RTN .= '<script type="text/javascript">'."\n";
@@ -2125,8 +2130,8 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</script>'."\n";
 
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post" id="cont_op_document_form">'."\n";
-		$RTN .= '<div class="unit_pane2">'."\n";
-		$RTN .= '	<div class="pane2L">'."\n";
+		$RTN .= '<div class="unit cols">'."\n";
+		$RTN .= '	<div class="cols-col cols-1of2"><div class="cols-pad">'."\n";
 		$RTN .= '		<p>'."\n";
 		$RTN .= '			保存ファイル名の変換ルールを設定してください。<br />'."\n";
 		$RTN .= '		</p>'."\n";
@@ -2166,10 +2171,10 @@ class pxplugin_PicklesCrawler_admin{
 		usort( $entry_list , create_function( '$a,$b' , 'if( $a[\'priority\'] > $b[\'priority\'] ){ return 1; } if( $a[\'priority\'] < $b[\'priority\'] ){ return -1; } return 0;' ) );
 
 		foreach( $entry_list as $line ){
-			$btn_operation_up = '<a href="javascript:up_item('.text::data2text( $line['priority'] ).');">上へ</a>';
-			$btn_operation_down = '<a href="javascript:down_item('.text::data2text( $line['priority'] ).');">下へ</a>';
+			$btn_operation_up = '<a href="javascript:up_item('.t::data2text( $line['priority'] ).');">上へ</a>';
+			$btn_operation_down = '<a href="javascript:down_item('.t::data2text( $line['priority'] ).');">下へ</a>';
 
-			$RTN .= ''.$this->mk_hx( '優先度['.$line['priority'].'] <span style="font-weight:normal;">'.$btn_operation_up.' '.$btn_operation_down.'</span>' , null , array( 'allow_html'=>true ) ).''."\n";
+			$RTN .= '<h2>優先度['.$line['priority'].'] <span style="font-weight:normal;">'.$btn_operation_up.' '.$btn_operation_down.'</span></h2>'."\n";
 			$RTN .= '<table style="width:100%;" class="form_elements">'."\n";
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>元のパス</div></th>'."\n";
@@ -2234,8 +2239,8 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
-		$RTN .= '	</div>'."\n";
-		$RTN .= '	<div class="pane2R">'."\n";
+		$RTN .= '	</div></div>'."\n";
+		$RTN .= '	<div class="cols-col cols-1of2 cols-last"><div class="cols-pad">'."\n";
 		$RTN .= '		<ul>'."\n";
 		$RTN .= '			<li>'."\n";
 		$RTN .= '				元のパス、変換後の保存先パスは、スラッシュから始まる絶対パスで指定してください。先頭のスラッシュは、常にドメイン名の直後の階層に当たります。<br />'."\n";
@@ -2262,9 +2267,9 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '						<dd>ワイルドカード「*(アスタリスク)」を指定したうち、キー「XXXXX」番目(1から数える)にマッチした値。</dd>'."\n";
 		$RTN .= '				</dl>'."\n";
 		$RTN .= '			</li>'."\n";
-		$RTN .= '	</ul>'."\n";
-		$RTN .= '	</div>'."\n";
-		$RTN .= '</div>'."\n";
+		$RTN .= '		</ul>'."\n";
+		$RTN .= '	</div></div>'."\n";
+		$RTN .= '</div><!-- /.cols -->'."\n";
 
 		$RTN .= '	<p>これでいい場合は「確認する」を、さらに追加する場合は「画面を更新」をクリックしてください。</p>'."\n";
 		$RTN .= '	<div class="center">'."\n";
@@ -2283,9 +2288,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	保存ファイル名のリライトルール編集：確認
-	function page_edit_localfilename_rewriterules_confirm(){
+	/**
+	 * 保存ファイル名のリライトルール編集：確認
+	 */
+	private function page_edit_localfilename_rewriterules_confirm(){
 		$RTN = ''."\n";
 		$HIDDEN = ''."\n";
 
@@ -2316,7 +2322,7 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '</table>'."\n";
 		}
 
-		$RTN .= '<div class="p AlignC">'."\n";
+		$RTN .= '<div class="unit center">'."\n";
 		$RTN .= '<form action="'.htmlspecialchars( $this->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
@@ -2337,15 +2343,17 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	保存ファイル名のリライトルール編集：チェック
-	function check_edit_localfilename_rewriterules_check(){
+	/**
+	 * 保存ファイル名のリライトルール編集：チェック
+	 */
+	private function check_edit_localfilename_rewriterules_check(){
 		$RTN = array();
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	保存ファイル名のリライトルール編集：実行
-	function execute_edit_localfilename_rewriterules_execute(){
+	/**
+	 * 保存ファイル名のリライトルール編集：実行
+	 */
+	private function execute_edit_localfilename_rewriterules_execute(){
 		// if( !$this->user->save_t_lastaction() ){
 		// 	#	2重書き込み防止
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
@@ -2374,9 +2382,10 @@ class pxplugin_PicklesCrawler_admin{
 
 		return	$this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	保存ファイル名のリライトルール編集：完了
-	function page_edit_localfilename_rewriterules_thanks(){
+	/**
+	 * 保存ファイル名のリライトルール編集：完了
+	 */
+	private function page_edit_localfilename_rewriterules_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>保存ファイル名のリライトルール編集処理を完了しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->href( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
@@ -2388,8 +2397,12 @@ class pxplugin_PicklesCrawler_admin{
 
 
 	###################################################################################################################
-	#	文字コード・改行コード変換設定編集
-	function start_edit_charset(){
+
+
+	/**
+	 * 文字コード・改行コード変換設定編集
+	 */
+	private function start_edit_charset(){
 		$error = $this->check_edit_charset_check();
 		if( $this->px->req()->get_param('mode') == 'thanks' ){
 			return	$this->page_edit_charset_thanks();
@@ -2409,9 +2422,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$this->page_edit_charset_input( $error );
 	}
-	#--------------------------------------
-	#	文字コード・改行コード変換設定編集：入力
-	function page_edit_charset_input( $error ){
+	/**
+	 * 文字コード・改行コード変換設定編集：入力
+	 */
+	private function page_edit_charset_input( $error ){
 		$charsetList = array( 'UTF-8' , 'Shift_JIS' , 'EUC-JP' , 'JIS' );
 		$crlfList = array( 'CRLF' , 'CR' , 'LF' );
 		$RTN = '';
@@ -2481,9 +2495,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	文字コード・改行コード変換設定編集：確認
-	function page_edit_charset_confirm(){
+	/**
+	 * 文字コード・改行コード変換設定編集：確認
+	 */
+	private function page_edit_charset_confirm(){
 		$RTN = '';
 		$HIDDEN = '';
 
@@ -2547,9 +2562,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	文字コード・改行コード変換設定編集：チェック
-	function check_edit_charset_check(){
+	/**
+	 * 文字コード・改行コード変換設定編集：チェック
+	 */
+	private function check_edit_charset_check(){
 		$charsetList = array( 'UTF-8' , 'Shift_JIS' , 'EUC-JP' , 'JIS' );
 		$RTN = array();
 		if( strlen( $this->px->req()->get_param('charset') ) ){
@@ -2581,9 +2597,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	文字コード・改行コード変換設定編集：実行
-	function execute_edit_charset_execute(){
+	/**
+	 * 文字コード・改行コード変換設定編集：実行
+	 */
+	private function execute_edit_charset_execute(){
 		// if( !$this->user->save_t_lastaction() ){
 		// 	#	2重書き込み防止
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
@@ -2603,9 +2620,10 @@ class pxplugin_PicklesCrawler_admin{
 
 		return	$this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	文字コード・改行コード変換設定編集：完了
-	function page_edit_charset_thanks(){
+	/**
+	 * 文字コード・改行コード変換設定編集：完了
+	 */
+	private function page_edit_charset_thanks(){
 		$RTN = '';
 		$RTN .= '<p>文字コード・改行コード変換設定を保存しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->href( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
@@ -2617,8 +2635,12 @@ class pxplugin_PicklesCrawler_admin{
 
 
 	###################################################################################################################
-	#	一括置換設定編集
-	function start_edit_preg_replace(){
+
+
+	/**
+	 * 一括置換設定編集
+	 */
+	private function start_edit_preg_replace(){
 		if( strlen( $this->px->req()->get_param('add:pregpattern') ) ){
 			for( $i = 1; strlen( $this->px->req()->get_param('p'.$i.':pregpattern') ); $i ++ ){;}
 			$this->px->req()->set_param( 'p'.$i.':priority' , $i );
@@ -2656,9 +2678,10 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		return	$this->page_edit_preg_replace_input( $error );
 	}
-	#--------------------------------------
-	#	一括置換設定編集：入力
-	function page_edit_preg_replace_input( $error ){
+	/**
+	 * 一括置換設定編集：入力
+	 */
+	private function page_edit_preg_replace_input( $error ){
 		$RTN = '';
 
 		$RTN .= '<script type="text/javascript">'."\n";
@@ -2717,10 +2740,10 @@ class pxplugin_PicklesCrawler_admin{
 		usort( $entry_list , create_function( '$a,$b' , 'if( $a[\'priority\'] > $b[\'priority\'] ){ return 1; } if( $a[\'priority\'] < $b[\'priority\'] ){ return -1; } return 0;' ) );
 
 		foreach( $entry_list as $line ){
-			$btn_operation_up = '<a href="javascript:up_item('.text::data2text( $line['priority'] ).');">上へ</a>';
-			$btn_operation_down = '<a href="javascript:down_item('.text::data2text( $line['priority'] ).');">下へ</a>';
+			$btn_operation_up = '<a href="javascript:up_item('.t::data2text( $line['priority'] ).');">上へ</a>';
+			$btn_operation_down = '<a href="javascript:down_item('.t::data2text( $line['priority'] ).');">下へ</a>';
 
-			$RTN .= ''.$this->mk_hx( '実行順序['.$line['priority'].'] <span style="font-weight:normal;">'.$btn_operation_up.' '.$btn_operation_down.'</span>' , null , array( 'allow_html'=>true ) ).''."\n";
+			$RTN .= '<h2>実行順序['.$line['priority'].'] <span style="font-weight:normal;">'.$btn_operation_up.' '.$btn_operation_down.'</span></h2>'."\n";
 			$RTN .= '<table style="width:100%;" class="form_elements">'."\n";
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>pregパターン</div></th>'."\n";
@@ -2744,8 +2767,8 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '		<th style="width:30%;"><div>対象のパス</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
 			$RTN .= '			<div><input type="text" name="p'.$line['priority'].':path" value="'.htmlspecialchars( $line['path'] ).'" /></div>'."\n";
-			$RTN .= '			<ul class="annotation mt0">'."\n";
-			$RTN .= '				<li class="ttrs">※リライトルール適用後のパスで指定してください。</li>'."\n";
+			$RTN .= '			<ul class="form_elements-notes">'."\n";
+			$RTN .= '				<li>※リライトルール適用後のパスで指定してください。</li>'."\n";
 			$RTN .= '			</ul>'."\n";
 			if( strlen( $error['p'.$line['priority'].':path'] ) ){
 				$RTN .= '			<div class="error">'.$error['p'.$line['priority'].':path'].'</div>'."\n";
@@ -2766,9 +2789,9 @@ class pxplugin_PicklesCrawler_admin{
 			$RTN .= '		<th style="width:30%;"><div>対象とする拡張子</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
 			$RTN .= '			<div><input type="text" name="p'.$line['priority'].':ext" value="'.htmlspecialchars( $line['ext'] ).'" /></div>'."\n";
-			$RTN .= '			<ul class="annotation mt0">'."\n";
-			$RTN .= '				<li class="ttrs">※セミコロン区切りで複数指定できます。</li>'."\n";
-			$RTN .= '				<li class="ttrs">※例：<code>html;htm;css;js</code></li>'."\n";
+			$RTN .= '			<ul class="form_elements-notes">'."\n";
+			$RTN .= '				<li>※セミコロン区切りで複数指定できます。</li>'."\n";
+			$RTN .= '				<li>※例：<code>html;htm;css;js</code></li>'."\n";
 			$RTN .= '			</ul>'."\n";
 			if( strlen( $error['p'.$line['priority'].':ext'] ) ){
 				$RTN .= '			<div class="error">'.$error['p'.$line['priority'].':ext'].'</div>'."\n";
@@ -2804,8 +2827,8 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		<th style="width:30%;"><div>対象のパス</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
 		$RTN .= '			<div><input type="text" name="add:path" value="/" style="font-family:\'ＭＳ ゴシック\';" /></div>'."\n";
-		$RTN .= '			<ul class="annotation mt0">'."\n";
-		$RTN .= '				<li class="ttrs">※リライトルール適用後のパスで指定してください。</li>'."\n";
+		$RTN .= '			<ul class="form_elements-notes">'."\n";
+		$RTN .= '				<li>※リライトルール適用後のパスで指定してください。</li>'."\n";
 		$RTN .= '			</ul>'."\n";
 		if( strlen( $error['add:path'] ) ){
 			$RTN .= '			<div class="error">'.$error['add:path'].'</div>'."\n";
@@ -2825,9 +2848,9 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		<th style="width:30%;"><div>対象とする拡張子</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
 		$RTN .= '			<div><input type="text" name="add:ext" value="html;htm;css;js" style="font-family:\'ＭＳ ゴシック\';" /></div>'."\n";
-		$RTN .= '			<ul class="annotation mt0">'."\n";
-		$RTN .= '				<li class="ttrs">※セミコロン区切りで複数指定できます。</li>'."\n";
-		$RTN .= '				<li class="ttrs">※例：<code>html;htm;css;js</code></li>'."\n";
+		$RTN .= '			<ul class="form_elements-notes">'."\n";
+		$RTN .= '				<li>※セミコロン区切りで複数指定できます。</li>'."\n";
+		$RTN .= '				<li>※例：<code>html;htm;css;js</code></li>'."\n";
 		$RTN .= '			</ul>'."\n";
 		if( strlen( $error['add:ext'] ) ){
 			$RTN .= '			<div class="error">'.$error['add:ext'].'</div>'."\n";
@@ -2853,9 +2876,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	一括置換設定編集：確認
-	function page_edit_preg_replace_confirm(){
+	/**
+	 * 一括置換設定編集：確認
+	 */
+	private function page_edit_preg_replace_confirm(){
 		$RTN = '';
 		$HIDDEN = '';
 
@@ -2921,9 +2945,10 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	一括置換設定編集：チェック
-	function check_edit_preg_replace_check(){
+	/**
+	 * 一括置換設定編集：チェック
+	 */
+	private function check_edit_preg_replace_check(){
 		$RTN = array();
 /*
 		if( !strlen( $this->px->req()->get_param('field_id') ) ){
@@ -2936,9 +2961,10 @@ class pxplugin_PicklesCrawler_admin{
 */
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	一括置換設定編集：実行
-	function execute_edit_preg_replace_execute(){
+	/**
+	 * 一括置換設定編集：実行
+	 */
+	private function execute_edit_preg_replace_execute(){
 		// if( !$this->user->save_t_lastaction() ){
 		// 	#	2重書き込み防止
 		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
@@ -2969,9 +2995,10 @@ class pxplugin_PicklesCrawler_admin{
 
 		return	$this->px->redirect( $this->href().'&mode=thanks' );
 	}
-	#--------------------------------------
-	#	一括置換設定編集：完了
-	function page_edit_preg_replace_thanks(){
+	/**
+	 * 一括置換設定編集：完了
+	 */
+	private function page_edit_preg_replace_thanks(){
 		$RTN = '';
 		$RTN .= '<p>一括置換設定編集処理を完了しました。</p>';
 		$RTN .= '<form action="'.htmlspecialchars( $this->href( ':detail.'.$this->cmd[1] ) ).'" method="post">'."\n";
@@ -3439,6 +3466,18 @@ class pxplugin_PicklesCrawler_admin{
 		// $RTN .= '	<tr>'."\n";
 		// $RTN .= '		<th style="width:30%;">crawlctrl のページID</th>'."\n";
 		// $RTN .= '		<td style="width:70%;">'.htmlspecialchars( $this->pcconf->pid['crawlctrl'] ).'</td>'."\n";
+		// $RTN .= '	</tr>'."\n";
+		$RTN .= '</table>'."\n";
+		$RTN .= '</div>'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
+		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
+		$RTN .= '</form>'."\n";
+		return	$RTN;
+	}
+
+}
+
+?>['crawlctrl'] ).'</td>'."\n";
 		// $RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 		$RTN .= '</div>'."\n";
