@@ -38,6 +38,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 			$this->pcconf->set_value( 'crawl_max_url_number' , intval( $this->px->req()->get_param('crawl_max_url_number') ) );
 		}
 
+		error_reporting(4);
 	}
 
 	/**
@@ -239,7 +240,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 			#			新しいURLがリストに追加される可能性があるため、
 			#			これがゼロ件になるまで処理を継続する必要があるために、用意されたものです。
 
-			$counter = $this->getcount_target_url();
+			$counter = $this->get_count_target_url();
 			if( !$counter ){
 				$this->msg( 'All URL are done!!' );
 				break;
@@ -469,9 +470,9 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				if( !is_file( $fullpath_save_to ) ){
 					#	この時点でダウンロードファイルがあるべきパスに保存されていなければ、
 					#	これ以降の処理は不要。次へ進む。
-					$this->msg( '処理済件数 '.intval( $this->getcount_done_url() ).' 件.' );
+					$this->msg( '処理済件数 '.intval( $this->get_count_done_url() ).' 件.' );
 					$this->msg( '残件数 '.count( $this->target_url_list ).' 件.' );
-					$this->progress_report( 'progress' , intval( $this->getcount_done_url() ).'/'.count( $this->target_url_list ) );
+					$this->progress_report( 'progress' , intval( $this->get_count_done_url() ).'/'.count( $this->target_url_list ) );
 
 					$this->msg( '' );
 					continue;
@@ -552,11 +553,11 @@ class pxplugin_PicklesCrawler_crawlctrl{
 					}
 				}
 
-				$this->msg( '処理済件数 '.intval( $this->getcount_done_url() ).' 件.' );
+				$this->msg( '処理済件数 '.intval( $this->get_count_done_url() ).' 件.' );
 				$this->msg( '残件数 '.count( $this->target_url_list ).' 件.' );
-				$this->progress_report( 'progress' , intval( $this->getcount_done_url() ).'/'.count( $this->target_url_list ) );
+				$this->progress_report( 'progress' , intval( $this->get_count_done_url() ).'/'.count( $this->target_url_list ) );
 
-				if( $this->getcount_done_url() >= $this->pcconf->get_value( 'crawl_max_url_number' ) ){
+				if( $this->get_count_done_url() >= $this->pcconf->get_value( 'crawl_max_url_number' ) ){
 					#	処理可能な最大URL数を超えたらおしまい。
 					$message_string = 'URL count is OVER '.$this->pcconf->get_value( 'crawl_max_url_number' ).'.';
 					$program_model->crawl_error( $message_string );
@@ -633,9 +634,10 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	$this->exit_process();
 	}
 
-	#--------------------------------------
-	#	進捗報告
-	function progress_report( $key , $cont ){
+	/**
+	 * 進捗報告
+	 */
+	protected function progress_report( $key , $cont ){
 		#	このメソッドは、
 		#	必要に応じて拡張して利用してください。
 	}
@@ -643,8 +645,12 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 
 	#########################################################################################################################################################
-	#	文字コード・改行コード変換
-	function execute_charset( $path_save_to ){
+
+
+	/**
+	 * 文字コード・改行コード変換
+	 */
+	private function execute_charset( $path_save_to ){
 		#	PicklesCrawler 0.3.0 追加
 		#	このメソッドは、指定されたファイルを開いて、
 		#	変換して、そして勝手に保存して閉じます。
@@ -753,9 +759,14 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	true;
 	}
 
+
 	#########################################################################################################################################################
-	#	一括置換処理
-	function execute_preg_replace( $path_save_to , $url ){
+
+
+	/**
+	 * 一括置換処理
+	 */
+	private function execute_preg_replace( $path_save_to , $url ){
 		#	PicklesCrawler 0.3.0 追加
 		#	このメソッドは、指定されたファイルを開いて、変換して、そして勝手に保存して閉じます。
 
@@ -863,8 +874,10 @@ class pxplugin_PicklesCrawler_crawlctrl{
 	#########################################################################################################################################################
 	#	その他
 
-	#	URLを処理待ちリストに追加
-	function add_target_url( $url , $option = array() ){
+	/**
+	 * URLを処理待ちリストに追加
+	 */
+	private function add_target_url( $url , $option = array() ){
 		#	アンカーを考慮
 		if( strpos( $url , '#' ) ){
 			list($url,$anchor) = explode('#',$url,2);
@@ -940,23 +953,32 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 		return	true;
 	}
-	#	現在処理待ちのURL数を取得
-	function getcount_target_url(){
+
+	/**
+	 * 現在処理待ちのURL数を取得
+	 */
+	public function get_count_target_url(){
 		return	count( $this->target_url_list );
 	}
-	#	URLが処理済であることを宣言
-	function target_url_done( $url ){
+	/**
+	 * URLが処理済であることを宣言
+	 */
+	private function target_url_done( $url ){
 		unset( $this->target_url_list[$url] );
 		$this->done_url_count ++;
 		return	true;
 	}
-	#	処理済URL数を取得
-	function getcount_done_url(){
+	/**
+	 * 処理済URL数を取得
+	 */
+	public function get_count_done_url(){
 		return	intval( $this->done_url_count );
 	}
 
-	#	ダウンロード先のディレクトリパスを得る
-	function get_path_download_to(){
+	/**
+	 * ダウンロード先のディレクトリパスを得る
+	 */
+	private function get_path_download_to(){
 		$path = $this->pcconf->get_program_home_dir( $this->cmd[1] , $this->cmd[2] );
 		if( !is_dir( $path ) ){ return false; }
 
@@ -969,9 +991,10 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		return	$RTN;
 	}
 
-	#--------------------------------------
-	#	ダウンロードしたURLの一覧に履歴を残す
-	function save_executed_url_row( $array_csv_line = array() ){
+	/**
+	 * ダウンロードしたURLの一覧に履歴を残す
+	 */
+	private function save_executed_url_row( $array_csv_line = array() ){
 		$path_dir_download_to = realpath( $this->get_path_download_to() );
 		if( !is_dir( $path_dir_download_to ) ){ return false; }
 		if( !is_dir( $path_dir_download_to.'/__LOGS__' ) ){
@@ -1356,13 +1379,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 }
 
-?>ck(){
-		$lockfilepath = $this->get_path_lockfile();
-
-		#	PHPのFileStatusCacheをクリア
-		clearstatcache();
-
-		return	$this->dbh->rmdir( $lockfilepath );
+?>s->dbh->rmdir( $lockfilepath );
 	}
 
 	#--------------------------------------

@@ -46,8 +46,11 @@ class pxplugin_PicklesCrawler_resources_zip{
 		$zip->close();
 		return true;
 	}
-	#	再帰的にZIPエントリを追加する
-	function zip_add_directory( &$zip , $path_base , $path_local = null ){
+
+	/**
+	 * 再帰的にZIPエントリを追加する
+	 */
+	private function zip_add_directory( &$zip , $path_base , $path_local = null ){
 		if( !is_dir( $path_base.$path_local ) ){ return false; }
 
 		$dirlist = $this->px->dbh()->ls( $path_base.$path_local );
@@ -65,9 +68,10 @@ class pxplugin_PicklesCrawler_resources_zip{
 		return	true;
 	}
 
-	#--------------------------------------
-	#	ZIPファイルを展開する
-	function unzip( $path_target , $path_unzipto ){
+	/**
+	 * ZIPファイルを展開する
+	 */
+	public function unzip( $path_target , $path_unzipto ){
 		if( !class_exists( 'ZipArchive' ) ){ return false; }
 
 		$zip = new ZipArchive;
@@ -82,4 +86,5 @@ class pxplugin_PicklesCrawler_resources_zip{
 		return true;
 	}
 }
+
 ?>

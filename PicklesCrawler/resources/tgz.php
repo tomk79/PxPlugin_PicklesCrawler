@@ -19,17 +19,19 @@ class pxplugin_PicklesCrawler_resources_tgz{
 		$this->path_command_tar = $path_command_tar;
 	}
 
-	#--------------------------------------
-	#	ZIPメソッドを利用可能か否か確認する
-	function enable_zip(){
+	/**
+	 * ZIPメソッドを利用可能か否か確認する
+	 */
+	public function enable_zip(){
 		if( !strlen( $this->path_command_tar ) ){ return false; }
 		if( !is_callable( 'exec' ) ){ return false; }
 		return	true;
 	}
 
-	#--------------------------------------
-	#	ファイルまたはディレクトリをZIP圧縮する
-	function zip( $path_target , $path_zipto ){
+	/**
+	 * ファイルまたはディレクトリをZIP圧縮する
+	 */
+	public function zip( $path_target , $path_zipto ){
 		#	$path_target => 圧縮する元ファイル/ディレクトリ
 		#	$path_zipto => 作成したzipファイルの保存先パス
 		$path_target = $this->px->dbh()->get_realpath($path_target);
@@ -78,9 +80,10 @@ class pxplugin_PicklesCrawler_resources_tgz{
 
 	}
 
-	#--------------------------------------
-	#	ZIPファイルを展開する
-	function unzip( $path_target , $path_unzipto ){
+	/**
+	 * ZIPファイルを展開する
+	 */
+	public function unzip( $path_target , $path_unzipto ){
 		#	$path_target => 圧縮する元ファイル/ディレクトリ
 		#	$path_unzipto => 作成したzipファイルの保存先パス
 		$path_target = $this->px->dbh()->get_realpath($path_target);
