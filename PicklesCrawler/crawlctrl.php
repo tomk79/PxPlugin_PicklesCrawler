@@ -1018,7 +1018,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#	/ 行の文字コードを調整
 		#--------------------------------------
 
-		$csv_line = $this->px->dbh()->mk_csv( array( $array_csv_line ) , $csv_charset );
+		$csv_line = $this->px->dbh()->mk_csv( array( $array_csv_line ) , array('charset'=>$csv_charset) );
 
 		error_log( $csv_line , 3 , $path_dir_download_to.'/__LOGS__/download_list.csv' );
 		$this->px->dbh()->chmod( $path_dir_download_to.'/__LOGS__/download_list.csv' );
@@ -1379,7 +1379,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 
 }
 
-?>s->dbh->rmdir( $lockfilepath );
+?>ckfilepath );
 	}
 
 	#--------------------------------------
