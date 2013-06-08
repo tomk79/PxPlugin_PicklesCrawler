@@ -3477,44 +3477,4 @@ class pxplugin_PicklesCrawler_admin{
 
 }
 
-?>ttr" style="width:70%;">'.htmlspecialchars( $path ).'</td>'."\n";
-		$RTN .= '	</tr>'."\n";
-		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th class="ttr" style="width:30%;">収集数の上限</th>'."\n";
-		$RTN .= '		<td class="ttr" style="width:70%;">'.htmlspecialchars( $this->pcconf->get_value('crawl_max_url_number') ).'</td>'."\n";
-		$RTN .= '	</tr>'."\n";
-		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th class="ttr" style="width:30%;">tarのパス</th>'."\n";
-		$RTN .= '		<td class="ttr" style="width:70%;">'.htmlspecialchars( $this->conf->path_commands['tar'] ).'</td>'."\n";
-		$RTN .= '	</tr>'."\n";
-		// $RTN .= '	<tr>'."\n";
-		// $RTN .= '		<th class="ttr" style="width:30%;">crawlctrl のページID</th>'."\n";
-		// $RTN .= '		<td class="ttr" style="width:70%;">'.htmlspecialchars( $this->pcconf->pid['crawlctrl'] ).'</td>'."\n";
-		// $RTN .= '	</tr>'."\n";
-		$RTN .= '</table>'."\n";
-		$RTN .= '</div>'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->href(':') ).'" method="post">'."\n";
-		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
-		$RTN .= '</form>'."\n";
-		return	$RTN;
-	}
-
-}
-
-?>�ル編集' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.create_program.'.$this->req->pvelm(1) , array( 'title'=>'新規プログラム作成' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.edit_program.'.$this->req->pvelm(1).'.'.$this->req->pvelm(2) , array( 'title'=>'プログラム編集' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.execute_program.'.$this->req->pvelm(1).'.'.$this->req->pvelm(2) , array( 'title'=>'プログラム実行' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.delete_program.'.$this->req->pvelm(1).'.'.$this->req->pvelm(2) , array( 'title'=>'プログラム削除' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.edit_charset.'.$this->req->pvelm(1) , array( 'title'=>'文字コード・改行コード変換設定' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.edit_preg_replace.'.$this->req->pvelm(1) , array( 'title'=>'一括置換設定' , 'path'=>$path ) );
-		$this->site->setpageinfoall( $this->req->po().'.delete_proj.'.$this->req->pvelm(1) , array( 'title'=>'プロジェクトを削除' , 'path'=>$path ) );
-
-		$path = $path.'/'.$this->req->po().'.execute_program.'.$this->req->pvelm(1).'.'.$this->req->pvelm(2);
-		$this->site->setpageinfoall( $this->req->po().'.delete_program_content.'.$this->req->pvelm(1) , array( 'title'=>'プログラムコンテンツの削除' , 'path'=>$path ) );
-		return true;
-	}
-
-}
-
 ?>

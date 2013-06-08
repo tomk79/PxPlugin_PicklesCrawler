@@ -202,24 +202,4 @@ class pxplugin_PicklesCrawler_config{
 
 }
 
-?>�「クロールコントローラ」の読み込みに失敗しました。' , __FILE__ , __LINE__ );
-			return	false;
-		}
-		$obj = new $className( &$this );
-		return	$obj;
-	}
-
-	#--------------------------------------
-	#	基本オブジェクトを取り出す
-	function &get_basicobj_conf()		{ return $this->conf; }
-	function &get_basicobj_errors()		{ return $this->errors; }
-	function &get_basicobj_dbh()		{ return $this->dbh; }
-	function &get_basicobj_req()		{ return $this->req; }
-	function &get_basicobj_user()		{ return $this->user; }
-	function &get_basicobj_site()		{ return $this->site; }
-	function &get_basicobj_theme()		{ return $this->theme; }
-	function &get_basicobj_custom()		{ return $this->custom; }
-
-}
-
 ?>

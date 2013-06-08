@@ -169,7 +169,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 				foreach( $filelist as $filename ){
 					if( $filename == '..' || $filename == '.' ){ continue; }
 					if( $filename == 'crawl.lock' ){ continue; } //ロックファイルは消しちゃダメ。
-					if( !$this->px->dbh()->rmdir_all( $path_dir_download_to.'/'.$filename ) ){
+					if( !$this->px->dbh()->rm( $path_dir_download_to.'/'.$filename ) ){
 						$this->error_log( 'Delete ['.$filename.'] FAILD.' , __FILE__ , __LINE__ );
 						return	$this->exit_process();
 					}else{
@@ -1310,7 +1310,7 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		}elseif( !is_writable( $path ) ){
 			return	false;
 		}
-		return	$this->px->dbh()->rmdir_all( $path );
+		return	$this->px->dbh()->rm( $path );
 	}
 
 
@@ -1367,24 +1367,13 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		#	PHPのFileStatusCacheをクリア
 		clearstatcache();
 
-		return	$this->px->dbh()->rmdir_all( $lockfilepath );
+		return	$this->px->dbh()->rm( $lockfilepath );
 	}
 
 	/**
 	 * ロックファイルのパスを返す
 	 */
 	private function get_path_lockfile(){
-		return	realpath( $this->get_path_download_to() ).'/crawl.lock';
-	}
-
-}
-
-?>ckfilepath );
-	}
-
-	#--------------------------------------
-	#	ロックファイルのパスを返す
-	function get_path_lockfile(){
 		return	realpath( $this->get_path_download_to() ).'/crawl.lock';
 	}
 
