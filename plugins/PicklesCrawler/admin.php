@@ -281,11 +281,13 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		<td style="width:70%;">'."\n";
 		$urlList = $project_model->get_urllist_outofsite();
 		if( count( $urlList ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 			$RTN .= '			<ul>'."\n";
 			foreach( $urlList as $url ){
 				$RTN .= '				<li>'.htmlspecialchars( $url ).'</li>'."\n";
 			}
 			$RTN .= '			</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '			<div>指定はありません。</div>'."\n";
 		}
@@ -296,11 +298,13 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '		<td style="width:70%;">'."\n";
 		$urlList = $project_model->get_urllist_startpages();
 		if( count( $urlList ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 			$RTN .= '			<ul>'."\n";
 			foreach( $urlList as $url ){
 				$RTN .= '				<li>'.htmlspecialchars( $url ).'</li>'."\n";
 			}
 			$RTN .= '			</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '			<div>指定はありません。</div>'."\n";
 		}
@@ -889,14 +893,18 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>対象外URLリスト</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
+		$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 		$RTN .= '			<div>'.t::text2html( $this->px->req()->get_param('urllist_outofsite') ).'</div>'."\n";
+		$RTN .= '			</div>'."\n";
 		$HIDDEN .= '<input type="hidden" name="urllist_outofsite" value="'.htmlspecialchars( $this->px->req()->get_param('urllist_outofsite') ).'" />';
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>追加スタートページURLリスト</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
+		$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 		$RTN .= '			<div>'.t::text2html( $this->px->req()->get_param('urllist_startpages') ).'</div>'."\n";
+		$RTN .= '			</div>'."\n";
 		$HIDDEN .= '<input type="hidden" name="urllist_startpages" value="'.htmlspecialchars( $this->px->req()->get_param('urllist_startpages') ).'" />';
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1312,10 +1320,6 @@ class pxplugin_PicklesCrawler_admin{
 	 * プロジェクトをエクスポート：実行
 	 */
 	private function execute_export_execute(){
-		// if( !$this->user->save_t_lastaction() ){
-		// 	#	2重書き込み防止
-		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
-		// }
 
 		$className = $this->px->load_px_plugin_class('/PicklesCrawler/resources/io.php');
 		if( !$className ){
@@ -1502,28 +1506,6 @@ class pxplugin_PicklesCrawler_admin{
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
-/*
-		#	2:10 2007/12/31
-		#	プログラムタイプは、snapshot以外は実装しない方針にしました。よって、選択もできなくなりました。
-		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th style="width:30%;"><div>プログラムタイプ</div></th>'."\n";
-		$RTN .= '		<td style="width:70%;">'."\n";
-		$c = array( $this->px->req()->get_param('program_type') => ' selected="selected"' );
-		$RTN .= '			<div>'."\n";
-		$RTN .= '				<select name="program_type">'."\n";
-		$RTN .= '					<option value=""'.$c[''].'>選択してください。</option>'."\n";
-		$RTN .= '					<option value="snapshot"'.$c['snapshot'].'>スナップショット</option>'."\n";
-		$RTN .= '					<option value="searchindex"'.$c['searchindex'].'>検索用インデックス生成</option>'."\n";
-		$RTN .= '					<option value="import2picklesframework"'.$c['import2picklesframework'].'>PicklesFrameworkへのインポート</option>'."\n";
-		$RTN .= '					<option value="cratepdf"'.$c['cratepdf'].'>PDFドキュメント生成</option>'."\n";
-		$RTN .= '				</select>'."\n";
-		$RTN .= '			</div>'."\n";
-		if( strlen( $error{'program_type'} ) ){
-			$RTN .= '			<div class="error">'.$error{'program_type'}.'</div>'."\n";
-		}
-		$RTN .= '		</td>'."\n";
-		$RTN .= '	</tr>'."\n";
-*/
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>常に送信するパラメータ</div></th>'."\n";//PicklesCrawler 0.3.0 追加
 		$RTN .= '		<td style="width:70%;">'."\n";
@@ -1620,14 +1602,6 @@ class pxplugin_PicklesCrawler_admin{
 		$HIDDEN .= '<input type="hidden" name="program_param" value="'.htmlspecialchars( $this->px->req()->get_param('program_param') ).'" />';
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
-/*
-		$RTN .= '	<tr>'."\n";
-		$RTN .= '		<th style="width:30%;"><div>プログラムタイプ</div></th>'."\n";
-		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->px->req()->get_param('program_type') ).'</div>'."\n";
-		$RTN .= '		</td>'."\n";
-		$RTN .= '	</tr>'."\n";
-*/
 		$HIDDEN .= '<input type="hidden" name="program_type" value="'.htmlspecialchars( $this->px->req()->get_param('program_type') ).'" />';
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>HTTP_USER_AGENT</div></th>'."\n";
@@ -1647,11 +1621,13 @@ class pxplugin_PicklesCrawler_admin{
 			}
 		}
 		if( count( $inputvalueList ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 			$RTN .= '			<ul>'."\n";
 			foreach( $inputvalueList as $val ){
 				$RTN .= '				<li>'.htmlspecialchars( $val ).'</li>'."\n";
 			}
 			$RTN .= '			</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '			<div class="ttrs">指定されていません。</div>'."\n";
 		}
@@ -1669,11 +1645,13 @@ class pxplugin_PicklesCrawler_admin{
 			}
 		}
 		if( count( $inputvalueList ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:510px;">'."\n";
 			$RTN .= '			<ul>'."\n";
 			foreach( $inputvalueList as $val ){
 				$RTN .= '				<li>'.htmlspecialchars( $val ).'</li>'."\n";
 			}
 			$RTN .= '			</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '			<div class="ttrs">指定されていません。</div>'."\n";
 		}
@@ -2354,10 +2332,6 @@ class pxplugin_PicklesCrawler_admin{
 	 * 保存ファイル名のリライトルール編集：実行
 	 */
 	private function execute_edit_localfilename_rewriterules_execute(){
-		// if( !$this->user->save_t_lastaction() ){
-		// 	#	2重書き込み防止
-		// 	return	$this->px->redirect( $this->href().'&mode=thanks' );
-		// }
 
 		$project_model = &$this->pcconf->factory_model_project();
 		$project_model->load_project( $this->cmd[1] );
@@ -3059,11 +3033,13 @@ class pxplugin_PicklesCrawler_admin{
 
 		$urllist_scope = $program_model->get_urllist_scope();
 		if( count( $urllist_scope ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:310px;">'."\n";
 			$RTN .= '<ul>'."\n";
 			foreach( $urllist_scope as $url ){
 				$RTN .= '<li>'.htmlspecialchars($url).'</li>'."\n";
 			}
 			$RTN .= '</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '<div>全てのURLが対象です。</div>'."\n";
 		}
@@ -3076,11 +3052,13 @@ class pxplugin_PicklesCrawler_admin{
 		$RTN .= '			<div style="overflow:hidden;">'."\n";
 		$urllist_nodownload = $program_model->get_urllist_nodownload();
 		if( count( $urllist_nodownload ) ){
+			$RTN .= '			<div style="overflow:auto; max-height:300px; max-width:310px;">'."\n";
 			$RTN .= '<ul>'."\n";
 			foreach( $urllist_nodownload as $url ){
 				$RTN .= '<li>'.htmlspecialchars($url).'</li>'."\n";
 			}
 			$RTN .= '</ul>'."\n";
+			$RTN .= '			</div>'."\n";
 		}else{
 			$RTN .= '<div>ダウンロード対象外に指定されたURLはありません。</div>'."\n";
 		}
