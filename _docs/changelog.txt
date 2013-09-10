@@ -1,14 +1,21 @@
 
 
 [-- PicklesCrawler 1.0.0b3 (2013/**/**) --]
-・UIの改善。
+
+- スタートページ一覧を大量に投入した場合に、初期設定時点でタイムアウトが発生し得る不具合を修正。
+- UIを一部改善。
+
 
 [-- PicklesCrawler 1.0.0b2 (2013/6/8) --]
-・PxFW API仕様に則り、プラグインのバージョン番号を返すようにした。
-・PxFW 1.0.0b6 での変更に対応した。
+
+- PxFW API仕様に則り、プラグインのバージョン番号を返すようにした。
+- PxFW 1.0.0b6 での変更に対応した。
+
 
 [-- PicklesCrawler 1.0.0b1 (2013/5/3) --]
-・Pickles Framework 1.x 系に移植。
+
+- Pickles Framework 1.x 系に移植。
+
 
 [-- PicklesCrawler 0.4.3 (2011/08/28) --]
 ・PicklesFrameworkの拡張HTTPレスポンスヘッダー X-PXFW-RELATEDLINK に対応した。

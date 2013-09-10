@@ -3,7 +3,6 @@
 /**
  * クロールコントロール
  * Copyright (C)Tomoya Koyanagi.
- * Last Update: 12:53 2011/08/28
  */
 class pxplugin_PicklesCrawler_crawlctrl{
 
@@ -192,12 +191,14 @@ class pxplugin_PicklesCrawler_crawlctrl{
 		$this->add_target_url( $startpage );
 		unset( $startpage );
 		foreach( $this->project_model->get_urllist_startpages() as $additional_startpage ){
+			set_time_limit(30);
 			if( $this->add_target_url( $additional_startpage ) ){
 				$this->msg( 'add ['.$additional_startpage.'] as the Startpage.' );
 			}else{
 				$this->msg( 'FAILD to add ['.$additional_startpage.'] as the Startpage.' );
 			}
 		}
+		set_time_limit(30);
 		unset( $additional_startpage );
 
 		#	CSVの定義行を保存
