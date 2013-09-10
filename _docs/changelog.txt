@@ -1,9 +1,10 @@
 
 
-[-- PicklesCrawler 1.0.0b3 (2013/**/**) --]
+[-- PicklesCrawler 1.0.0b3 (2013/9/11) --]
 
 - スタートページ一覧を大量に投入した場合に、初期設定時点でタイムアウトが発生し得る不具合を修正。
 - UIを一部改善。
+- PicklesCrawlerディレクトリをplugins下に移動した。
 
 
 [-- PicklesCrawler 1.0.0b2 (2013/6/8) --]
