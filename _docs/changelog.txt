@@ -1,3 +1,10 @@
+/**
+ * PicklesCrawler plugin 更新履歴
+ */
+
+[-- PicklesCrawler 1.0.0b4 (2013/**/**) --]
+
+- ********
 
 
 [-- PicklesCrawler 1.0.0b3 (2013/9/11) --]
