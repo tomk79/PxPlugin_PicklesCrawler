@@ -472,7 +472,7 @@ class pxplugin_PicklesCrawler_model_project{
 	#--------------------------------------
 	#	URL変換時に省略するファイル名の入出力
 	public function get_omit_filename(){
-		if( !strlen( $this->info_omit_filename ) ){
+		if( !is_array( $this->info_omit_filename ) ){
 			return	array();
 		}
 		return	$this->info_omit_filename;
